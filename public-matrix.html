@@ -10,38 +10,63 @@
     <nav class="navbar glass">
         <div class="nav-brand">Maxtring</div>
         <div class="nav-links">
-            <a href="dashboard.html" class="nav-item">Dashboard</a>
-            <a href="calendar.html" class="nav-item">Calendar</a>
-            <a href="public-matrix.html" class="nav-item active">Public Matrix</a>
-            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;">Content Bank</a>
-            <a href="business-process.html" class="nav-item">Business Process</a>
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="public-matrix.html" class="nav-item active"><i class="fa-solid fa-table"></i> Public Matrix</a>
+            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
+            <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
         </div>
         <div class="flex items-center gap-4">
-            <button id="theme-toggle" class="theme-toggle">🌙</button>
+            <span id="user-info" style="font-weight: 600; font-size: 0.9rem;">
+                <span id="user-name">User</span> <span style="color: var(--border);">|</span> <span id="user-role" class="text-primary">Role</span>
+            </span>
+            <button id="theme-toggle" class="theme-toggle glass" style="width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; color: var(--text-main);"><i class="fa-solid fa-moon"></i></button>
+            <button id="logout-btn" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button>
         </div>
     </nav>
     
-    <main class="container animate-fade-in" style="flex: 1; max-width: 1400px;">
-        <h1 style="margin-bottom: 0.5rem;">Matrix All Marketing 📋</h1>
-        <p style="color: var(--text-muted); margin-bottom: 2rem;">Tampilan transparan dari seluruh jadwal dan status konten. (Read-Only)</p>
+    <div class="nav-bottom">
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="public-matrix.html" class="nav-item active"><i class="fa-solid fa-table"></i></a>
+        <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i></a>
+    </div>
+    
+    <main class="container animate-fade-up" style="max-width: 100%;">
+        <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 2rem;"><i class="fa-solid fa-table"></i> Matrix All Marketing (Read-Only)</h1>
+                <p class="text-muted" style="font-size: 1.1rem;">Pantau status pengerjaan seluruh konten harian secara transparan.</p>
+            </div>
+            <div>
+                <a href="https://docs.google.com/spreadsheets/d/1r63LtnKfHdcGhV8t-2cGnQdNzxu98KAjya3pmRICSyU/edit" target="_blank" class="btn btn-outline">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Spreadsheet Asli
+                </a>
+            </div>
+        </div>
         
-        <div class="card glass">
+        <div class="card">
             <div class="table-container">
                 <table id="matrix-table" style="font-size: 0.9rem;">
                     <thead>
                         <tr>
                             <th>Task ID</th>
-                            <th>Tanggal</th>
-                            <th>Judul</th>
+                            <th>Tanggal Tayang</th>
+                            <th>Judul Konten</th>
+                            <th>SMS Status</th>
                             <th>CW Status</th>
                             <th>GD Status</th>
                             <th>Talent Status</th>
                             <th>Overall Status</th>
+                            <th>Catatan Terakhir</th>
                         </tr>
                     </thead>
                     <tbody id="matrix-body">
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 2rem;">Memuat data...</td>
+                            <td colspan="9" style="text-align: center; padding: 3rem;">
+                                <div class="spinner" style="margin: 0 auto;"></div>
+                                <p class="text-muted">Memuat data matrix...</p>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -49,15 +74,15 @@
         </div>
     </main>
 
+    <footer>
+        <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
+    </footer>
+
     <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const user = checkAuth(); // Semua bisa akses
             if (!user) return;
-            
-            if (user.role === 'SMS' || user.role === 'CMO') {
-                document.getElementById('nav-content-bank').style.display = 'block';
-            }
             
             const result = await callApi('getMatrixData', { month: 'Juni' });
             const tbody = document.getElementById('matrix-body');
@@ -65,32 +90,39 @@
             if (result && result.success && result.data.length > 0) {
                 let html = '';
                 result.data.forEach(row => {
+                    // Ambil baris catatan terakhir jika ada, pisahkan dengan newline
+                    let notes = row["Notes"] || '-';
+                    let lastNote = '-';
+                    if(notes !== '-') {
+                        const noteArr = notes.split('\n').filter(n => n.trim() !== '');
+                        if(noteArr.length > 0) {
+                            lastNote = noteArr[noteArr.length - 1];
+                            // Potong jika terlalu panjang
+                            if(lastNote.length > 50) lastNote = lastNote.substring(0, 50) + '...';
+                        }
+                    }
+                    
                     html += `
                         <tr>
-                            <td style="font-family: monospace;">${row["Task ID"] || '-'}</td>
+                            <td style="font-family: monospace; font-weight: 600;">${row["Task ID"] || '-'}</td>
                             <td>${row["Date"] || '-'}</td>
-                            <td style="font-weight: 500;">${row["Judul"] || row["Idea"] || '-'}</td>
+                            <td style="font-weight: 600;">${row["Judul"] || '-'}</td>
+                            <td><span class="badge ${getBadgeClass(row["SMS Status"])}">${row["SMS Status"] || 'Not Started'}</span></td>
                             <td><span class="badge ${getBadgeClass(row["CW Status"])}">${row["CW Status"] || 'Not Started'}</span></td>
                             <td><span class="badge ${getBadgeClass(row["GD Status"])}">${row["GD Status"] || 'Not Started'}</span></td>
                             <td><span class="badge ${getBadgeClass(row["Talent Status"])}">${row["Talent Status"] || 'Not Started'}</span></td>
-                            <td><span class="badge ${getBadgeClass(row["Overall Status"], true)}">${row["Overall Status"] || 'Not Started'}</span></td>
+                            <td><span class="badge ${getBadgeClass(row["Overall Status"])}">${row["Overall Status"] || 'Not Started'}</span></td>
+                            <td style="color: var(--text-muted); font-size: 0.8rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${notes}">
+                                ${lastNote}
+                            </td>
                         </tr>
                     `;
                 });
                 tbody.innerHTML = html;
             } else {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Tidak ada data Matrix.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size: 2rem; margin-bottom: 1rem; display:block;"></i>Tidak ada data Matrix.</td></tr>`;
             }
         });
-        
-        function getBadgeClass(status, isOverall = false) {
-            if (!status || status === 'Not Started') return 'badge-ns';
-            if (status === 'Approved') return 'badge-app';
-            if (status === 'Submitted' || status === 'On Process') return 'badge-prog';
-            if (status === 'Revisi') return 'badge-rev';
-            if (status === 'Posted' && isOverall) return 'badge-post';
-            return 'badge-ns';
-        }
     </script>
 </body>
 </html>

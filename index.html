@@ -5,47 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Maxtring</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4F46E5">
 </head>
-<body>
-    <button id="theme-toggle" class="theme-toggle" style="position: absolute; top: 1rem; right: 1rem;">🌙</button>
+<body style="align-items: center; justify-content: center; background: linear-gradient(135deg, var(--bg-color) 0%, hsla(var(--hue-primary), 80%, 60%, 0.15) 100%);">
     
-    <div class="login-container">
-        <div class="login-card card glass animate-fade-in">
-            <div class="login-logo">🚀</div>
-            <h1 class="nav-brand" style="font-size: 2rem; margin-bottom: 0.5rem;">Maxtring</h1>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">Matrix All Marketing - Job On Yours</p>
-            
-            <form id="login-form">
-                <div class="form-group" style="text-align: left;">
-                    <label class="form-label" for="username">Role ID</label>
-                    <input type="text" id="username" class="form-input" placeholder="contoh: cwjoy, cmo" required>
+    <button id="theme-toggle" class="theme-toggle glass" style="position: absolute; top: 1.5rem; right: 1.5rem; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; border: none; color: var(--text-main);"><i class="fa-solid fa-moon"></i></button>
+    
+    <div class="card glass card-glow animate-fade-up" style="width: 100%; max-width: 420px; padding: 2.5rem 2rem; text-align: center; border-radius: 24px;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 0 4px 12px rgba(0,0,0,0.1);">🚀</div>
+        <h1 class="nav-brand" style="font-size: 2.2rem; margin-bottom: 0.5rem;">Maxtring</h1>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; font-weight: 500;">Matrix All Marketing - Job On Yours</p>
+        
+        <form id="login-form">
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label" for="username">Role ID</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-user" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="text" id="username" class="form-input" style="padding-left: 2.8rem;" placeholder="e.g. staff-cw, head-gd, cmo" required>
                 </div>
-                
-                <div class="form-group" style="text-align: left;">
-                    <label class="form-label" for="password">Password</label>
-                    <input type="password" id="password" class="form-input" placeholder="Masukkan password" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-                    Lanjut Pilih Nama &rarr;
-                </button>
-            </form>
+            </div>
             
-            <form id="name-form" style="display: none; margin-top: 1rem;">
-                <div class="form-group" style="text-align: left;">
-                    <label class="form-label" for="name-select">Pilih Nama Kamu</label>
-                    <select id="name-select" class="form-select" required>
-                        <option value="">-- Pilih Nama --</option>
-                        <!-- Akan diisi oleh JS -->
-                    </select>
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label" for="password">Password</label>
+                <div style="position: relative;">
+                    <i class="fa-solid fa-lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                    <input type="password" id="password" class="form-input" style="padding-left: 2.8rem;" placeholder="Masukkan password" required>
                 </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-                    Masuk Dashboard
-                </button>
-            </form>
+            </div>
             
-        </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.9rem; font-size: 1.05rem;">
+                Lanjut Pilih Nama <i class="fa-solid fa-arrow-right" style="margin-left: 0.5rem;"></i>
+            </button>
+        </form>
+        
+        <form id="name-form" style="display: none; margin-top: 1rem;">
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label" for="name-select">Siapa kamu?</label>
+                <select id="name-select" class="form-select" required>
+                    <option value="">-- Pilih Nama --</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.9rem; font-size: 1.05rem;">
+                Masuk Dashboard <i class="fa-solid fa-right-to-bracket" style="margin-left: 0.5rem;"></i>
+            </button>
+        </form>
+        
     </div>
     
     <div id="loader">
@@ -55,7 +61,6 @@
     <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if already logged in
             if (localStorage.getItem('maxtring_user')) {
                 window.location.href = 'dashboard.html';
             }
@@ -72,7 +77,6 @@
                 if (result && result.success) {
                     tempUserData = { role: result.role, type: result.type };
                     
-                    // Populate names dropdown
                     const select = document.getElementById('name-select');
                     select.innerHTML = '<option value="">-- Pilih Nama --</option>';
                     
@@ -84,19 +88,17 @@
                             select.appendChild(option);
                         });
                     } else {
-                        // Fallback if no team data
                         const option = document.createElement('option');
-                        option.value = "User Default";
-                        option.textContent = "User Default (Tidak ada data tim)";
+                        option.value = "Default";
+                        option.textContent = "Default (No Team Data)";
                         select.appendChild(option);
                     }
                     
-                    // Switch forms
                     document.getElementById('login-form').style.display = 'none';
                     document.getElementById('name-form').style.display = 'block';
-                    document.getElementById('name-form').classList.add('animate-fade-in');
+                    document.getElementById('name-form').classList.add('animate-fade-up');
                 } else if (result) {
-                    alert(result.message || "Gagal login");
+                    alert(result.error || "Gagal login");
                 }
             });
             

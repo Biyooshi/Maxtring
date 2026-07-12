@@ -5,73 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Maxtring</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav class="navbar glass">
         <div class="nav-brand">Maxtring</div>
         <div class="nav-links">
-            <a href="dashboard.html" class="nav-item active">Dashboard</a>
-            <a href="calendar.html" class="nav-item">Calendar</a>
-            <a href="public-matrix.html" class="nav-item">Public Matrix</a>
-            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;">Content Bank</a>
-            <a href="business-process.html" class="nav-item">Business Process</a>
+            <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
+            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
+            <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
         </div>
         <div class="flex items-center gap-4">
-            <span id="user-info" style="font-weight: 500;">
-                <span id="user-name">User</span> | <span id="user-role" style="color: var(--primary);">Role</span>
+            <span id="user-info" style="font-weight: 600; font-size: 0.9rem;">
+                <span id="user-name">User</span> <span style="color: var(--border);">|</span> <span id="user-role" class="text-primary">Role</span>
             </span>
-            <button id="theme-toggle" class="theme-toggle">🌙</button>
-            <button id="logout-btn" class="btn btn-outline" style="padding: 0.4rem 0.8rem;">Keluar</button>
+            <button id="theme-toggle" class="theme-toggle glass" style="width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; color: var(--text-main);"><i class="fa-solid fa-moon"></i></button>
+            <button id="logout-btn" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button>
         </div>
     </nav>
     
-    <main class="container animate-fade-in" style="flex: 1;">
+    <!-- Mobile Bottom Nav -->
+    <div class="nav-bottom">
+        <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i></a>
+        <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i></a>
+        <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i></a>
+    </div>
+    
+    <main class="container animate-fade-up">
         <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
             <div>
-                <h1 style="font-size: 1.8rem;">Halo, <span id="welcome-name">User</span> 👋</h1>
-                <p style="color: var(--text-muted);">Berikut adalah ringkasan pekerjaanmu hari ini.</p>
+                <h1 style="font-size: 2rem;">Halo, <span id="welcome-name" style="color: var(--primary);">User</span> 👋</h1>
+                <p class="text-muted" style="font-size: 1.1rem;">Berikut adalah ringkasan pekerjaanmu hari ini.</p>
             </div>
         </div>
         
         <!-- Summary Cards -->
-        <div class="grid-cols-4" style="margin-bottom: 2rem;" id="summary-cards">
-            <!-- Will be populated by JS -->
-            <div class="card">
-                <h3 style="color: var(--text-muted); font-size: 0.9rem;">Total Task</h3>
-                <p style="font-size: 2rem; font-weight: 700;" id="count-total">0</p>
+        <div class="grid grid-cols-4" style="margin-bottom: 2.5rem;" id="summary-cards">
+            <div class="card card-glow">
+                <h3 class="text-muted" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fa-solid fa-list-check"></i> Total Task Aktif</h3>
+                <p style="font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem;" id="count-total">0</p>
             </div>
-            <div class="card">
-                <h3 style="color: var(--status-progress); font-size: 0.9rem;">Sedang Diproses</h3>
-                <p style="font-size: 2rem; font-weight: 700;" id="count-progress">0</p>
+            <div class="card card-glow">
+                <h3 style="color: var(--status-prog); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fa-solid fa-spinner"></i> Sedang Diproses</h3>
+                <p style="font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem;" id="count-progress">0</p>
             </div>
-            <div class="card">
-                <h3 style="color: var(--status-revisi); font-size: 0.9rem;">Butuh Revisi</h3>
-                <p style="font-size: 2rem; font-weight: 700;" id="count-revisi">0</p>
+            <div class="card card-glow">
+                <h3 style="color: var(--status-rev); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fa-solid fa-triangle-exclamation"></i> Butuh Revisi</h3>
+                <p style="font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem;" id="count-revisi">0</p>
             </div>
-            <div class="card">
-                <h3 style="color: var(--danger); font-size: 0.9rem;">Overdue</h3>
-                <p style="font-size: 2rem; font-weight: 700;" id="count-overdue">0</p>
+            <div class="card card-glow">
+                <h3 class="text-danger" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;"><i class="fa-solid fa-clock"></i> Overdue</h3>
+                <p style="font-size: 2.5rem; font-weight: 800; margin-top: 0.5rem;" id="count-overdue">0</p>
+            </div>
+        </div>
+
+        <!-- Analytics Section (CMO Only) -->
+        <div id="cmo-analytics" style="display: none; margin-bottom: 2.5rem;">
+            <h2 style="margin-bottom: 1rem;"><i class="fa-solid fa-chart-pie"></i> Analytics Overview</h2>
+            <div class="grid grid-cols-2">
+                <div class="card">
+                    <canvas id="statusChart" height="200"></सरतcanvas>
+                </div>
+                <div class="card">
+                    <p class="text-muted" style="margin-top: 4rem; text-align: center;">Insight AI (Coming Soon)</p>
+                </div>
             </div>
         </div>
         
         <!-- Task List -->
         <div class="card">
-            <h2 style="margin-bottom: 1.5rem;">Daftar Pekerjaan Aktif</h2>
+            <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-clipboard-list"></i> Daftar Pekerjaan</h2>
             <div class="table-container">
                 <table id="tasks-table">
                     <thead>
                         <tr>
                             <th>Task ID</th>
-                            <th>Tanggal</th>
                             <th>Judul Konten</th>
+                            <th>Deadline SLA</th>
                             <th>Status Matrix</th>
-                            <th>Status Saya</th>
+                            <th>Status Divisi</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tasks-body">
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 2rem;">Memuat data...</td>
+                            <td colspan="6" style="text-align: center; padding: 3rem;">
+                                <div class="spinner" style="margin: 0 auto;"></div>
+                                <p class="text-muted">Memuat data...</p>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -79,9 +103,42 @@
         </div>
     </main>
     
+    <!-- Modal Update Status -->
+    <div class="modal-overlay" id="status-modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1rem;">Update Status Task</h2>
+            <p class="text-muted" style="margin-bottom: 1.5rem;" id="modal-task-info">Task ID: -</p>
+            
+            <form id="status-form">
+                <input type="hidden" id="modal-task-id">
+                
+                <div class="form-group">
+                    <label class="form-label" for="modal-status">Pilih Status Baru</label>
+                    <select id="modal-status" class="form-select" required>
+                        <option value="Not Started">Not Started</option>
+                        <option value="On Process">On Process</option>
+                        <option value="Submitted">Submitted (Selesai/Draft siap QC)</option>
+                        <option value="Revisi">Revisi (Khusus Head)</option>
+                        <option value="Approved">Approved (Khusus Head)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="modal-notes">Catatan / Alasan (Opsional)</label>
+                    <textarea id="modal-notes" class="form-textarea" rows="3" placeholder="Tambahkan link gdrive atau alasan revisi di sini..."></textarea>
+                </div>
+                
+                <div class="flex justify-between" style="margin-top: 2rem;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('status-modal')">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <footer>
         <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
-        <p><a href="https://www.instagram.com/biyoosh.i/" target="_blank">@biyoosh.i</a></p>
+        <p><a href="https://www.instagram.com/biyoosh.i/" target="_blank"><i class="fa-brands fa-instagram"></i> @biyoosh.i</a></p>
     </footer>
     
     <div id="loader">
@@ -96,50 +153,64 @@
             
             document.getElementById('welcome-name').textContent = user.name;
             
-            // Show Content Bank for SMS and CMO
-            if (user.role === 'SMS' || user.role === 'CMO') {
-                document.getElementById('nav-content-bank').style.display = 'block';
+            if (user.role === 'CMO') {
+                document.getElementById('cmo-analytics').style.display = 'block';
             }
             
-            // Fetch Matrix Data
             const result = await callApi('getMatrixData', { month: 'Juni' });
             const tbody = document.getElementById('tasks-body');
             
             if (result && result.success) {
                 const data = result.data;
                 let html = '';
-                
                 let activeCount = 0;
+                let progCount = 0;
+                let revCount = 0;
+                let overdueCount = 0;
                 
-                // Filter data based on role
+                // Analytics counters
+                let statusCounts = { "Not Started": 0, "On Process": 0, "Approved": 0, "Posted": 0 };
+                
                 const filteredData = data.filter(row => {
-                    // CMO sees all
+                    statusCounts[row["Overall Status"]] = (statusCounts[row["Overall Status"]] || 0) + 1;
+                    
                     if (user.role === 'CMO') return true;
-                    // Heads see all in their division (currently simple logic, we just show all if head, or filter if staff)
-                    // In a real app we'd filter based on PIC column, but we don't have PIC columns in dummy setup
-                    // For now, let's just show rows that are not "Posted" to keep dashboard clean
-                    return row["Overall Status"] !== "Posted";
+                    if (row["Overall Status"] === "Posted") return false; // Hide posted for clean view
+                    
+                    // Simple routing: if staff/head, they see everything for now for demo purposes, 
+                    // ideally we filter by PIC Name here if that column existed.
+                    return true; 
                 });
                 
                 filteredData.forEach(row => {
                     activeCount++;
-                    // Determine badge class
-                    let myStatus = row[`${user.role} Status`] || row["Overall Status"] || "Not Started";
-                    let badgeClass = 'badge-ns';
-                    if(myStatus === 'Approved' || myStatus === 'Posted') badgeClass = 'badge-app';
-                    if(myStatus === 'On Process' || myStatus === 'Submitted') badgeClass = 'badge-prog';
-                    if(myStatus === 'Revisi') badgeClass = 'badge-rev';
                     
+                    let targetCol = user.role === 'CMO' ? "Overall Status" : `${user.role} Status`;
+                    let myStatus = row[targetCol] || "Not Started";
+                    
+                    if (myStatus === "On Process" || myStatus === "Submitted") progCount++;
+                    if (myStatus === "Revisi") revCount++;
+                    
+                    // Calculate SLA based on Role
+                    let deadlineCol = `Deadline ${user.role}`;
+                    let slaInfo = calculateSLA(row[deadlineCol]);
+                    if (slaInfo.text.includes("Overdue") && myStatus !== 'Approved') overdueCount++;
+                    
+                    // Render Row
                     html += `
                         <tr>
-                            <td style="font-family: monospace;">${row["Task ID"] || '-'}</td>
-                            <td>${row["Date"] || '-'}</td>
-                            <td style="font-weight: 500;">${row["Judul"] || row["Idea"] || '-'}</td>
-                            <td><span class="badge ${row["Overall Status"] === 'Posted' ? 'badge-post' : 'badge-prog'}">${row["Overall Status"] || 'Not Started'}</span></td>
-                            <td><span class="badge ${badgeClass}">${myStatus}</span></td>
+                            <td style="font-family: monospace; font-weight: 600;">${row["Task ID"] || '-'}</td>
+                            <td style="font-weight: 600;">${row["Judul"] || '-'}</td>
                             <td>
-                                <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="updateStatus('${row["Task ID"]}')">
-                                    Update Status
+                                <div style="font-size: 0.85rem; font-weight: 600; color: ${slaInfo.color}; margin-bottom: 0.25rem;">${slaInfo.text}</div>
+                                <div class="progress-container"><div class="progress-bar" style="width: ${slaInfo.progress}%; background-color: ${slaInfo.color};"></div></div>
+                                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">${row[deadlineCol] || 'Tidak diset'}</div>
+                            </td>
+                            <td><span class="badge ${getBadgeClass(row["Overall Status"])}">${row["Overall Status"] || 'Not Started'}</span></td>
+                            <td><span class="badge ${getBadgeClass(myStatus)}">${myStatus}</span></td>
+                            <td>
+                                <button class="btn btn-outline btn-sm" onclick="openUpdateModal('${row["Task ID"]}', '${row["Judul"]}', '${myStatus}')">
+                                    <i class="fa-solid fa-pen"></i> Update
                                 </button>
                             </td>
                         </tr>
@@ -147,34 +218,81 @@
                 });
                 
                 if (activeCount === 0) {
-                    html = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">Yeay! Tidak ada task aktif saat ini.</td></tr>`;
+                    html = `<tr><td colspan="6" style="text-align: center; padding: 3rem;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🎉</div>
+                        Yeay! Tidak ada task aktif saat ini.
+                    </td></tr>`;
                 }
                 
                 tbody.innerHTML = html;
                 document.getElementById('count-total').textContent = activeCount;
+                document.getElementById('count-progress').textContent = progCount;
+                document.getElementById('count-revisi').textContent = revCount;
+                document.getElementById('count-overdue').textContent = overdueCount;
+                
+                // Init Chart if CMO
+                if (user.role === 'CMO') {
+                    const ctx = document.getElementById('statusChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Not Started', 'On Process', 'Approved', 'Posted'],
+                            datasets: [{
+                                data: [statusCounts["Not Started"], statusCounts["On Process"], statusCounts["Approved"], statusCounts["Posted"]],
+                                backgroundColor: ['#9CA3AF', '#F59E0B', '#10B981', '#8B5CF6'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'right' }
+                            }
+                        }
+                    });
+                }
                 
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--danger);">Gagal memuat data</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Gagal memuat data</td></tr>`;
             }
-        });
-        
-        async function updateStatus(taskId) {
-            const user = JSON.parse(localStorage.getItem('maxtring_user'));
-            const newStatus = prompt("Masukkan status baru (Not Started, On Process, Submitted, Approved, Revisi):", "On Process");
             
-            if (newStatus) {
+            // Handle Modal Form Submit
+            document.getElementById('status-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const taskId = document.getElementById('modal-task-id').value;
+                const newStatus = document.getElementById('modal-status').value;
+                const notes = document.getElementById('modal-notes').value;
+                
+                // Validasi Head Only untuk Approve/Revisi
+                if ((newStatus === 'Approved' || newStatus === 'Revisi') && user.type !== 'head' && user.role !== 'CMO') {
+                    alert("Hanya Head/Co-Head yang bisa melakukan Approve atau Revisi.");
+                    return;
+                }
+                
+                closeModal('status-modal');
+                
                 const res = await callApi('updateTaskStatus', {
                     taskId: taskId,
                     division: user.role,
                     newStatus: newStatus,
-                    user: user.name
+                    user: user.name,
+                    notes: notes
                 });
                 
                 if (res && res.success) {
                     alert("Status berhasil diupdate!");
                     window.location.reload();
                 }
-            }
+            });
+        });
+        
+        window.openUpdateModal = function(taskId, title, currentStatus) {
+            document.getElementById('modal-task-info').textContent = `${taskId} - ${title}`;
+            document.getElementById('modal-task-id').value = taskId;
+            document.getElementById('modal-status').value = currentStatus;
+            document.getElementById('modal-notes').value = ''; // clear previous notes
+            openModal('status-modal');
         }
     </script>
 </body>

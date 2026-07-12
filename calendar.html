@@ -5,43 +5,208 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar - Maxtring</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- FullCalendar and Draggable -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <style>
+        #external-events {
+            padding: 1rem;
+            background: rgba(0,0,0,0.02);
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        [data-theme="dark"] #external-events {
+            background: rgba(255,255,255,0.02);
+        }
+        .fc-event-draggable {
+            margin: 10px 0;
+            padding: 12px;
+            background: var(--surface);
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+            box-shadow: var(--shadow-sm);
+            cursor: move;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar glass">
         <div class="nav-brand">Maxtring</div>
         <div class="nav-links">
-            <a href="dashboard.html" class="nav-item">Dashboard</a>
-            <a href="calendar.html" class="nav-item active">Calendar</a>
-            <a href="public-matrix.html" class="nav-item">Public Matrix</a>
-            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;">Content Bank</a>
-            <a href="business-process.html" class="nav-item">Business Process</a>
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="calendar.html" class="nav-item active"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
+            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
+            <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
         </div>
         <div class="flex items-center gap-4">
-            <button id="theme-toggle" class="theme-toggle">🌙</button>
+            <button id="theme-toggle" class="theme-toggle glass" style="width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; color: var(--text-main);"><i class="fa-solid fa-moon"></i></button>
         </div>
     </nav>
     
-    <main class="container animate-fade-in" style="flex: 1;">
-        <h1 style="margin-bottom: 2rem;">Kalender Konten 📅</h1>
+    <div class="nav-bottom">
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="calendar.html" class="nav-item active"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i></a>
+        <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i></a>
+    </div>
+    
+    <main class="container animate-fade-up">
+        <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2rem;"><i class="fa-solid fa-calendar-days"></i> Kalender Konten</h1>
+        </div>
         
-        <div class="card glass" style="text-align: center; padding: 4rem;">
-            <p style="font-size: 1.2rem; color: var(--text-muted);">
-                Tampilan Kalender akan menampilkan grid tanggal dengan status warna (hijau, kuning, merah) dari task yang berjalan.
-            </p>
-            <p style="margin-top: 1rem;">
-                *Ini adalah mockup UI. Data jadwal nyata akan dihubungkan di tahap selanjutnya.*
-            </p>
+        <div class="grid" style="grid-template-columns: 280px 1fr; gap: 2rem;" id="calendar-layout">
+            
+            <!-- Sidebar / External Events (Only for SMS/CMO) -->
+            <div id="sidebar-container" style="display: none;">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem;"><i class="fa-solid fa-boxes-stacked"></i> Ide Siap Jadwal</h3>
+                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Drag ide di bawah ini dan lepaskan di kotak kalender.</p>
+                <div id="external-events">
+                    <div style="text-align: center; color: var(--text-muted); padding: 1rem;" id="draggable-loader">
+                        Memuat data...
+                    </div>
+                    <!-- Draggable events will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Calendar Container -->
+            <div class="card" id="calendar-wrapper" style="grid-column: 1 / -1;"> <!-- Default full width -->
+                <div id='calendar'></div>
+            </div>
+            
         </div>
     </main>
+    
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
 
     <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const user = checkAuth();
-            if (user && (user.role === 'SMS' || user.role === 'CMO')) {
-                document.getElementById('nav-content-bank').style.display = 'block';
+            if (!user) return;
+            
+            // Layout Adjustments based on Role
+            const sidebar = document.getElementById('sidebar-container');
+            const calWrapper = document.getElementById('calendar-wrapper');
+            
+            if (user.role === 'SMS' || user.role === 'CMO') {
+                document.getElementById('nav-content-bank').style.display = 'flex';
+                // Show sidebar and adjust calendar width
+                sidebar.style.display = 'block';
+                calWrapper.style.gridColumn = 'auto'; // Revert to grid placing
+                
+                // Fetch Content Bank to populate Draggables
+                fetchAndPopulateDraggables();
             }
+            
+            // Initialize Calendar
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                editable: false, // Matrix events are not draggable once placed (in this version)
+                droppable: true, // Allows dropping external events
+                height: 650,
+                events: async function(info, successCallback, failureCallback) {
+                    // Fetch Matrix data
+                    const result = await callApi('getMatrixData', { month: 'Juni' }); // Simplified to Juni
+                    if (result && result.success) {
+                        const events = result.data.map(row => {
+                            let color = '#4F46E5'; // default
+                            if (row["Overall Status"] === 'Posted') color = '#8B5CF6';
+                            if (row["Overall Status"] === 'Approved') color = '#10B981';
+                            
+                            // Try to parse Date
+                            let dateStr = row["Date"];
+                            // Simple parsing if format is YYYY-MM-DD
+                            // Assuming backend saves it cleanly or we clean it here
+                            // For safety, we expect standard format
+                            
+                            return {
+                                title: `${row["Judul"]} (${row["Overall Status"]})`,
+                                start: dateStr,
+                                allDay: true,
+                                backgroundColor: color
+                            };
+                        });
+                        successCallback(events);
+                    } else {
+                        failureCallback();
+                    }
+                },
+                drop: async function(info) {
+                    // Triggered when an external event is dropped onto the calendar
+                    const dateStr = info.dateStr;
+                    const ideaId = info.draggedEl.getAttribute('data-id');
+                    const ideaTitle = info.draggedEl.getAttribute('data-title');
+                    
+                    if(confirm(`Jadwalkan "${ideaTitle}" untuk tanggal ${dateStr}?`)) {
+                        // Call API to schedule
+                        const res = await callApi('scheduleIdea', {
+                            ideaData: { id: ideaId, title: ideaTitle, date: dateStr, month: 'Juni' }
+                        });
+                        
+                        if (res && res.success) {
+                            alert("Berhasil dijadwalkan!");
+                            // Remove from draggable list
+                            info.draggedEl.parentNode.removeChild(info.draggedEl);
+                            // Refresh Calendar
+                            calendar.refetchEvents();
+                        }
+                    }
+                }
+            });
+            
+            calendar.render();
+            
+            // Initialize Draggables
+            new FullCalendar.Draggable(document.getElementById('external-events'), {
+                itemSelector: '.fc-event-draggable',
+                eventData: function(eventEl) {
+                    return {
+                        title: eventEl.innerText
+                    };
+                }
+            });
         });
+        
+        async function fetchAndPopulateDraggables() {
+            const container = document.getElementById('external-events');
+            const result = await callApi('getContentBankData', { month: 'Juni' });
+            
+            if (result && result.success) {
+                let html = '';
+                // Filter only 'Accepted' status to be dragged
+                const acceptedIdeas = result.data.filter(row => row["Status"] === 'Accepted');
+                
+                if (acceptedIdeas.length === 0) {
+                    html = '<div style="text-align:center; padding: 1rem; color: var(--text-muted);">Tidak ada ide Accepted.</div>';
+                } else {
+                    acceptedIdeas.forEach(idea => {
+                        html += `
+                            <div class="fc-event-draggable" data-id="${idea["ID"]}" data-title="${idea["Judul"]}">
+                                <div><i class="fa-solid fa-grip-vertical text-muted" style="margin-right: 0.5rem;"></i>${idea["Judul"]}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Pillar: ${idea["Pillar"]}</div>
+                            </div>
+                        `;
+                    });
+                }
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div style="text-align:center; padding: 1rem; color: var(--danger);">Gagal memuat.</div>';
+            }
+        }
     </script>
 </body>
 </html>

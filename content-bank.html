@@ -10,21 +10,42 @@
     <nav class="navbar glass">
         <div class="nav-brand">Maxtring</div>
         <div class="nav-links">
-            <a href="dashboard.html" class="nav-item">Dashboard</a>
-            <a href="calendar.html" class="nav-item">Calendar</a>
-            <a href="public-matrix.html" class="nav-item">Public Matrix</a>
-            <a href="content-bank.html" class="nav-item active" id="nav-content-bank">Content Bank</a>
-            <a href="business-process.html" class="nav-item">Business Process</a>
+            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
+            <a href="content-bank.html" class="nav-item active" id="nav-content-bank"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
+            <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
         </div>
         <div class="flex items-center gap-4">
-            <button id="theme-toggle" class="theme-toggle">🌙</button>
+            <span id="user-info" style="font-weight: 600; font-size: 0.9rem;">
+                <span id="user-name">User</span> <span style="color: var(--border);">|</span> <span id="user-role" class="text-primary">Role</span>
+            </span>
+            <button id="theme-toggle" class="theme-toggle glass" style="width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; color: var(--text-main);"><i class="fa-solid fa-moon"></i></button>
+            <button id="logout-btn" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar</button>
         </div>
     </nav>
     
-    <main class="container animate-fade-in" style="flex: 1;">
-        <h1 style="margin-bottom: 2rem;">Kolam Ide (Content Bank) 💡</h1>
+    <div class="nav-bottom">
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i></a>
+        <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i></a>
+    </div>
+    
+    <main class="container animate-fade-up">
+        <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 2rem;"><i class="fa-solid fa-lightbulb" style="color: var(--accent);"></i> Kolam Ide Konten</h1>
+                <p class="text-muted" style="font-size: 1.1rem;">Daftar ide dari tim SMS. (Hanya diakses oleh SMS & CMO)</p>
+            </div>
+            <div>
+                <a href="https://docs.google.com/spreadsheets/d/1qZsdjUwEvHNqh1NM6Iol2VCmFeUeDt-jvv_Hf63DDts/edit" target="_blank" class="btn btn-outline">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Spreadsheet Asli
+                </a>
+            </div>
+        </div>
         
-        <div class="card glass">
+        <div class="card">
             <div class="table-container">
                 <table id="ideas-table">
                     <thead>
@@ -33,24 +54,35 @@
                             <th>Pillar</th>
                             <th>Judul Konten</th>
                             <th>Pengusul</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
+                            <th>Status Review</th>
+                            <th>Aksi Jadwal</th>
                         </tr>
                     </thead>
                     <tbody id="ideas-body">
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 2rem;">Memuat data...</td>
+                            <td colspan="6" style="text-align: center; padding: 3rem;">
+                                <div class="spinner" style="margin: 0 auto;"></div>
+                                <p class="text-muted">Memuat data ide...</p>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
+    
+    <footer>
+        <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
+    </footer>
+
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
 
     <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const user = checkAuth('SMS'); // Hanya SMS & CMO yg boleh masuk
+            const user = checkAuth('SMS'); // Hanya SMS & CMO
             if (!user) return;
             
             const result = await callApi('getContentBankData', { month: 'Juni' });
@@ -59,34 +91,34 @@
             if (result && result.success && result.data.length > 0) {
                 let html = '';
                 result.data.forEach(row => {
-                    let statusClass = 'badge-ns';
                     const status = row["Status"] || 'Unreviewed';
-                    
-                    if(status === 'Accepted') statusClass = 'badge-sub';
-                    if(status === 'Scheduled') statusClass = 'badge-prog';
-                    if(status === 'Posted') statusClass = 'badge-post';
                     
                     html += `
                         <tr>
-                            <td style="font-family: monospace;">${row["ID"] || '-'}</td>
-                            <td>${row["Pillar"] || '-'}</td>
-                            <td style="font-weight: 500;">${row["Judul"] || '-'}</td>
-                            <td>${row["Pengusul"] || '-'}</td>
-                            <td><span class="badge ${statusClass}">${status}</span></td>
+                            <td style="font-family: monospace; font-weight: 600;">${row["ID"] || '-'}</td>
+                            <td><span style="padding: 0.2rem 0.5rem; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 0.85rem;">${row["Pillar"] || '-'}</span></td>
+                            <td style="font-weight: 600;">${row["Judul"] || '-'}</td>
+                            <td><i class="fa-solid fa-user-circle text-muted"></i> ${row["Pengusul"] || '-'}</td>
+                            <td><span class="badge ${getBadgeClass(status)}">${status}</span></td>
                             <td>
-                                ${status === 'Accepted' ? `<button class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="scheduleIdea('${row["ID"]}', '${row["Judul"]}')">Schedule</button>` : '-'}
+                                ${status === 'Accepted' ? `
+                                    <button class="btn btn-primary btn-sm" onclick="scheduleIdea('${row["ID"]}', '${row["Judul"].replace(/'/g, "\\'")}')">
+                                        <i class="fa-solid fa-calendar-plus"></i> Jadwalkan Manual
+                                    </button>
+                                ` : (status === 'Scheduled' ? '<span class="text-muted"><i class="fa-solid fa-check"></i> Sudah Dijadwalkan</span>' : '-')}
                             </td>
                         </tr>
                     `;
                 });
                 tbody.innerHTML = html;
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">Tidak ada data ide.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size: 2rem; margin-bottom: 1rem; display:block;"></i>Tidak ada data ide.</td></tr>`;
             }
         });
         
         async function scheduleIdea(id, title) {
-            const date = prompt(`Masukkan tanggal tayang untuk "${title}" (YYYY-MM-DD):`);
+            // Ini untuk manual, tapi disarankan drag & drop di kalender
+            const date = prompt(`Masukkan tanggal tayang untuk "${title}"\nFormat YYYY-MM-DD (Contoh: 2026-06-15):`);
             if (date) {
                 const res = await callApi('scheduleIdea', {
                     ideaData: {

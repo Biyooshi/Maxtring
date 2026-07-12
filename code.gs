@@ -1,236 +1,250 @@
-/**
- * CODE.GS - MAXTRING API
- * Untuk dijalankan di Google Apps Script (tersemat pada Matrix All Marketing)
- * Hanya me-return JSON untuk Vercel frontend.
- */
+var FONNTE_TOKEN = "9PkBs4SoEG15Qbw8mVBd";
+var MATRIX_ID = "1r63LtnKfHdcGhV8t-2cGnQdNzxu98KAjya3pmRICSyU";
+var CONTENT_BANK_ID = "1qZsdjUwEvHNqh1NM6Iol2VCmFeUeDt-jvv_Hf63DDts";
+var SECRET_TOKEN = "maxtring2026";
 
-var MATRIX_SHEET_ID = '1r63LtnKfHdcGhV8t-2cGnQdNzxu98KAjya3pmRICSyU';
-var CONTENT_BANK_SHEET_ID = '1qZsdjUwEvHNqh1NM6Iol2VCmFeUeDt-jvv_Hf63DDts';
-var FONNTE_TOKEN = '9PkBs4SoEG15Qbw8mVBd';
-var SECRET_TOKEN = 'maxtring2026'; // Token untuk otentikasi API sederhana
-
-function getMatrixSpreadsheet() {
-  return SpreadsheetApp.openById(MATRIX_SHEET_ID);
-}
-
-function getContentBankSpreadsheet() {
-  return SpreadsheetApp.openById(CONTENT_BANK_SHEET_ID);
-}
-
-function setupEmailAuth() {
-  MailApp.sendEmail(Session.getActiveUser().getEmail(), "Maxtring Email Setup", "Otorisasi email aktif!");
-}
-
-function doPost(e) {
-  return handleRequest(e, true);
-}
-
-function doGet(e) {
-  return handleRequest(e, false);
-}
-
-function handleRequest(e, isPost) {
-  try {
-    var params = isPost ? JSON.parse(e.postData.contents) : e.parameter;
-    
-    // Simple authentication check
-    if (params.token !== SECRET_TOKEN) {
-      return ContentService.createTextOutput(JSON.stringify({ error: "Unauthorized" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    var func = params.action;
-    var result;
-    
-    if (func === "getMatrixData") {
-      result = getMatrixData(params.month);
-    } else if (func === "getContentBankData") {
-      result = getContentBankData(params.month);
-    } else if (func === "scheduleIdea") {
-      result = scheduleIdea(params.ideaData);
-    } else if (func === "updateTaskStatus") {
-      result = updateTaskStatus(params.taskId, params.division, params.newStatus, params.user);
-    } else if (func === "getTeamData") {
-      result = getTeamData();
-    } else if (func === "login") {
-      result = processLogin(params.username, params.password);
-    } else {
-      result = { error: "Action not found" };
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ error: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+// ==========================================
+// UTILITY FUNCTIONS
+// ==========================================
+function getSheetByName(spreadsheetId, sheetName) {
+  var ss = SpreadsheetApp.openById(spreadsheetId);
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
   }
+  return sheet;
 }
 
 function sendWhatsAppMessage(target, message) {
-  try {
-    var url = "https://api.fonnte.com/send";
-    var payload = {
-      "target": target,
-      "message": message,
-      "delay": "2-5"
-    };
-    var options = {
-      "method": "post",
-      "headers": {
-        "Authorization": FONNTE_TOKEN
-      },
-      "payload": payload,
-      "muteHttpExceptions": true
-    };
-    UrlFetchApp.fetch(url, options);
-  } catch (e) {
-    Logger.log("Failed to send WA: " + e.toString());
-  }
-}
-
-// --- LOGIN LOGIC ---
-function processLogin(username, password) {
-  var roles = {
-    "cwjoy": { pass: "cwjoy!!", role: "CW", type: "staff" },
-    "gdjoy": { pass: "gdjoy!!", role: "GD", type: "staff" },
-    "smsjoy": { pass: "smsjoy!!", role: "SMS", type: "staff" },
-    "talentjoy": { pass: "talentjoy!!", role: "Talent", type: "staff" },
-    "headcw": { pass: "headcw!!", role: "CW", type: "head" },
-    "headgd": { pass: "headgd!!", role: "GD", type: "head" },
-    "headsms": { pass: "headsms!!", role: "SMS", type: "head" },
-    "cmo": { pass: "biyooshi24!!", role: "CMO", type: "cmo" }
+  var options = {
+    'method': 'post',
+    'headers': {
+      'Authorization': FONNTE_TOKEN
+    },
+    'payload': {
+      'target': target,
+      'message': message,
+      'delay': '1',
+      'countryCode': '62'
+    }
   };
   
-  var user = roles[username];
-  if (user && user.pass === password) {
-    return { success: true, role: user.role, type: user.type, team: getTeamByRole(user.role) };
-  }
-  return { success: false, message: "Kredensial tidak valid" };
-}
-
-function getTeamByRole(role) {
-  var teamData = getTeamData().data;
-  if (!teamData) return [];
-  if (role === "CMO") return teamData;
-  return teamData.filter(function(t) { return t.divisi === role; });
-}
-
-// --- DATA FETCHING ---
-function getMatrixData(monthName) {
   try {
-    var ss = getMatrixSpreadsheet();
-    var sheet = ss.getSheetByName(monthName || "Juni"); 
-    if (!sheet) return { error: "Sheet " + (monthName || "Juni") + " tidak ditemukan" };
+    UrlFetchApp.fetch('https://api.fonnte.com/send', options);
+  } catch(e) {
+    console.error("Fonnte Error:", e);
+  }
+}
+
+// Map headers to column index
+function getHeaderMap(sheet) {
+  var data = sheet.getDataRange().getValues();
+  if (data.length === 0) return {};
+  var headers = data[0];
+  var map = {};
+  for (var i = 0; i < headers.length; i++) {
+    map[headers[i]] = i;
+  }
+  return map;
+}
+
+// Convert Array row to Object using header map
+function rowToObject(row, headers) {
+  var obj = {};
+  for (var i = 0; i < headers.length; i++) {
+    obj[headers[i]] = row[i];
+  }
+  return obj;
+}
+
+// Convert Object to Array row using header map
+function objectToRow(obj, headers, currentLength) {
+  var row = new Array(Math.max(headers.length, currentLength || 0));
+  for (var i = 0; i < headers.length; i++) {
+    if (obj.hasOwnProperty(headers[i])) {
+      row[i] = obj[headers[i]];
+    } else {
+      row[i] = ""; // Keep empty string for missing
+    }
+  }
+  return row;
+}
+
+// ==========================================
+// WEB APP ENDPOINT
+// ==========================================
+function doPost(e) {
+  var response = { success: false };
+  try {
+    var body = e.postData.contents;
+    var data = JSON.parse(body);
     
-    var data = sheet.getDataRange().getValues();
+    // Auth Check
+    if (data.token !== SECRET_TOKEN) {
+      return ContentService.createTextOutput(JSON.stringify({error: "Invalid Token"})).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    switch(data.action) {
+      case 'login':
+        response = processLogin(data.username, data.password);
+        break;
+      case 'getMatrixData':
+        response = getMatrixData(data.month);
+        break;
+      case 'getContentBankData':
+        response = getContentBankData(data.month);
+        break;
+      case 'scheduleIdea':
+        response = scheduleIdea(data.ideaData);
+        break;
+      case 'updateTaskStatus':
+        response = updateTaskStatus(data.taskId, data.division, data.newStatus, data.user, data.notes);
+        break;
+      default:
+        response.error = "Unknown action";
+    }
+    
+  } catch (err) {
+    response.error = err.toString();
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ==========================================
+// ACTIONS
+// ==========================================
+
+function processLogin(username, password) {
+  // Dummy Role Logic based on Blueprint
+  if (password !== 'biyooshi24!!') return { error: "Password salah!" };
+  
+  var users = {
+    'cmo': { role: 'CMO', type: 'cmo', team: [{nama: "Muhammad Nurul Qolbi"}] },
+    'head-sms': { role: 'SMS', type: 'head', team: [{nama: "Zahwa"}, {nama: "Rifqi"}] },
+    'staff-sms': { role: 'SMS', type: 'staff', team: [{nama: "Salsa"}, {nama: "Rara"}] },
+    'head-cw': { role: 'CW', type: 'head', team: [{nama: "Ben"}, {nama: "Rida"}] },
+    'staff-cw': { role: 'CW', type: 'staff', team: [{nama: "Rida"}, {nama: "Aldo"}] },
+    'head-gd': { role: 'GD', type: 'head', team: [{nama: "Yuna"}, {nama: "Soni"}] },
+    'staff-gd': { role: 'GD', type: 'staff', team: [{nama: "Dito"}, {nama: "Soni"}] },
+    'talent': { role: 'Talent', type: 'staff', team: [{nama: "Reza"}, {nama: "Putri"}] }
+  };
+  
+  if (users[username]) {
+    var u = users[username];
+    return { success: true, role: u.role, type: u.type, team: u.team };
+  }
+  return { error: "Role ID tidak ditemukan" };
+}
+
+function getMatrixData(month) {
+  try {
+    var sheet = getSheetByName(MATRIX_ID, month);
+    var data = sheet.getDataRange().getDisplayValues();
+    if (data.length <= 1) return { success: true, data: [] };
+    
     var headers = data[0];
     var result = [];
-    
     for (var i = 1; i < data.length; i++) {
-      if (!data[i][0]) continue; 
-      var row = {};
-      for (var j = 0; j < headers.length; j++) {
-        row[headers[j]] = data[i][j];
-      }
-      result.push(row);
+      if (!data[i][0]) continue; // Skip empty rows
+      result.push(rowToObject(data[i], headers));
     }
     return { success: true, data: result };
-  } catch (e) {
+  } catch(e) {
     return { error: e.toString() };
   }
 }
 
-function getContentBankData(monthName) {
+function getContentBankData(month) {
   try {
-    var ss = getContentBankSpreadsheet();
-    var sheet = ss.getSheetByName(monthName || "Juni"); 
-    if (!sheet) return { error: "Sheet " + (monthName || "Juni") + " tidak ditemukan di Content Bank" };
+    var sheet = getSheetByName(CONTENT_BANK_ID, month);
+    var data = sheet.getDataRange().getDisplayValues();
+    if (data.length <= 1) return { success: true, data: [] };
     
-    var data = sheet.getDataRange().getValues();
     var headers = data[0];
     var result = [];
-    
     for (var i = 1; i < data.length; i++) {
       if (!data[i][0]) continue;
-      var row = {};
-      for (var j = 0; j < headers.length; j++) {
-        row[headers[j]] = data[i][j];
-      }
-      result.push(row);
+      result.push(rowToObject(data[i], headers));
     }
     return { success: true, data: result };
-  } catch (e) {
+  } catch(e) {
     return { error: e.toString() };
   }
 }
 
-function getTeamData() {
-  try {
-    var ss = getMatrixSpreadsheet();
-    var sheet = ss.getSheetByName("Team Data");
-    if (!sheet) {
-      return { success: true, data: [
-        { nama: "Muhammad Nurul Qolbi", divisi: "CMO", contact: "6285233142178" },
-        { nama: "Riska Stephanie", divisi: "SMS", contact: "62895352730008" },
-        { nama: "Fanisa Aulia", divisi: "GD", contact: "6281357557510" },
-        { nama: "Benedict Jemima", divisi: "CW", contact: "6282114887824" },
-        { nama: "Refan Regika", divisi: "Talent", contact: "6285697039805" }
-      ]};
-    }
-    
-    var data = sheet.getDataRange().getValues();
-    var headers = data[0];
-    var result = [];
-    for (var i = 1; i < data.length; i++) {
-      if (!data[i][0]) continue;
-      var row = {};
-      for (var j = 0; j < headers.length; j++) {
-        row[headers[j].toLowerCase()] = data[i][j];
-      }
-      result.push(row);
-    }
-    return { success: true, data: result };
-  } catch (e) {
-    return { error: e.toString() };
-  }
-}
-
-// --- ACTIONS ---
+// Function to schedule an idea from Content Bank to Matrix
 function scheduleIdea(ideaData) {
   var lock = LockService.getScriptLock();
   try {
-    lock.waitLock(10000);
+    lock.waitLock(10000); // 10 seconds timeout
     
-    var cbSS = getContentBankSpreadsheet();
-    var cbSheet = cbSS.getSheetByName(ideaData.month || "Juni");
+    var cbSheet = getSheetByName(CONTENT_BANK_ID, ideaData.month);
+    var mxSheet = getSheetByName(MATRIX_ID, ideaData.month);
+    
+    // 1. Update status in Content Bank
     var cbData = cbSheet.getDataRange().getValues();
-    var foundCb = false;
+    var cbHeaders = cbData[0];
+    var cbHeaderMap = getHeaderMap(cbSheet);
+    
+    var idCol = cbHeaderMap["ID"];
+    var statusCol = cbHeaderMap["Status"];
+    var rowToUpdate = -1;
+    
+    if (idCol === undefined || statusCol === undefined) {
+      return { error: "Kolom ID/Status tidak ditemukan di Content Bank." };
+    }
     
     for (var i = 1; i < cbData.length; i++) {
-      if (cbData[i][0] == ideaData.id) { 
-        cbSheet.getRange(i + 1, cbData[0].indexOf('Status') + 1).setValue('Scheduled');
-        foundCb = true;
+      if (cbData[i][idCol] == ideaData.id) {
+        rowToUpdate = i + 1;
         break;
       }
     }
     
-    var mxSS = getMatrixSpreadsheet();
-    var mxSheet = mxSS.getSheetByName(ideaData.month || "Juni");
-    var newTaskId = "TASK-" + new Date().getTime();
+    if (rowToUpdate === -1) return { error: "ID Content Bank tidak ditemukan" };
+    cbSheet.getRange(rowToUpdate, statusCol + 1).setValue("Scheduled");
     
-    mxSheet.appendRow([
-      newTaskId, 
-      ideaData.date, 
-      ideaData.title, 
-      "Not Started", 
-      "Not Started", 
-      "Not Started", 
-      "Not Started", 
-      ideaData.id    
-    ]);
+    // 2. Prepare data for Matrix
+    var mxHeaders = mxSheet.getDataRange().getValues()[0] || ["Task ID", "Date", "Judul", "CB_Ref_ID", "Overall Status", "CW Status", "GD Status", "Talent Status"];
+    
+    // If matrix sheet is empty, set headers
+    if (!mxSheet.getDataRange().getValues()[0]) {
+       mxSheet.getRange(1, 1, 1, mxHeaders.length).setValues([mxHeaders]);
+    }
+    
+    var mxHeaderMap = getHeaderMap(mxSheet);
+    var newTaskId = "MAX-" + new Date().getTime().toString().substr(-5);
+    
+    var newRowObj = {};
+    newRowObj["Task ID"] = newTaskId;
+    newRowObj["Date"] = ideaData.date; // The H date
+    newRowObj["Judul"] = ideaData.title;
+    newRowObj["CB_Ref_ID"] = ideaData.id;
+    newRowObj["Overall Status"] = "On Process";
+    newRowObj["CW Status"] = "Not Started";
+    newRowObj["GD Status"] = "Not Started";
+    newRowObj["Talent Status"] = "Not Started";
+    newRowObj["SMS Status"] = "Not Started";
+    
+    // SLA Calculation
+    var d = new Date(ideaData.date);
+    if (!isNaN(d.getTime())) {
+      var cwDate = new Date(d); cwDate.setDate(cwDate.getDate() - 3);
+      var gdDate = new Date(d); gdDate.setDate(gdDate.getDate() - 2);
+      var tlDate = new Date(d); tlDate.setDate(tlDate.getDate() - 2);
+      
+      newRowObj["Deadline CW"] = Utilities.formatDate(cwDate, "GMT+7", "yyyy-MM-dd");
+      newRowObj["Deadline GD"] = Utilities.formatDate(gdDate, "GMT+7", "yyyy-MM-dd");
+      newRowObj["Deadline Talent"] = Utilities.formatDate(tlDate, "GMT+7", "yyyy-MM-dd");
+    }
+    
+    var mxRowData = objectToRow(newRowObj, mxHeaders, mxHeaders.length);
+    mxSheet.appendRow(mxRowData);
     
     SpreadsheetApp.flush();
     return { success: true, taskId: newTaskId };
+    
   } catch (e) {
     return { error: e.toString() };
   } finally {
@@ -238,38 +252,77 @@ function scheduleIdea(ideaData) {
   }
 }
 
-function updateTaskStatus(taskId, division, newStatus, user) {
+function updateTaskStatus(taskId, division, newStatus, user, notes) {
   var lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
     
-    var mxSS = getMatrixSpreadsheet();
-    var mxSheet = mxSS.getSheetByName("Juni"); 
+    // Assume all updates happen in 'Juni' for now as per constraints
+    var mxSheet = getSheetByName(MATRIX_ID, "Juni");
     var data = mxSheet.getDataRange().getValues();
     var headers = data[0];
+    var headerMap = getHeaderMap(mxSheet);
     
-    var colIndex = headers.indexOf(division + ' Status');
-    if (colIndex === -1) return { error: "Kolom divisi tidak ditemukan" };
+    var idCol = headerMap["Task ID"];
+    var targetCol = headerMap[division + " Status"];
+    var overallCol = headerMap["Overall Status"];
+    var notesCol = headerMap["Notes"]; // If exists
     
+    if (idCol === undefined) return { error: "Header Task ID tidak ditemukan." };
+    if (targetCol === undefined) {
+      // Add column if it doesn't exist dynamically
+      targetCol = headers.length;
+      mxSheet.getRange(1, targetCol + 1).setValue(division + " Status");
+      headers.push(division + " Status");
+    }
+    
+    var rowToUpdate = -1;
     for (var i = 1; i < data.length; i++) {
-      if (data[i][0] === taskId) {
-        mxSheet.getRange(i + 1, colIndex + 1).setValue(newStatus);
-        
-        var logSheet = mxSS.getSheetByName("Audit Log");
-        if (logSheet) {
-          logSheet.appendRow([new Date(), user, taskId, division, newStatus]);
-        }
-        
-        SpreadsheetApp.flush();
-        
-        if (newStatus === "Approved") {
-          sendWhatsAppMessage("6285233142178", "Halo CMO, Task " + taskId + " divisi " + division + " telah di-Approved oleh " + user);
-        }
-        
-        return { success: true };
+      if (data[i][idCol] == taskId) {
+        rowToUpdate = i + 1;
+        break;
       }
     }
-    return { error: "Task tidak ditemukan" };
+    
+    if (rowToUpdate === -1) return { error: "Task tidak ditemukan" };
+    
+    // Update Status
+    mxSheet.getRange(rowToUpdate, targetCol + 1).setValue(newStatus);
+    
+    // Auto-update Overall Status if Approved
+    if (newStatus === "Approved" && overallCol !== undefined) {
+      // Logic checks could go here to verify ALL are approved before setting Overall to Approved.
+      // For now, let's keep it simple or manual.
+    }
+    
+    // Record Notes if provided
+    if (notes && notes.length > 0) {
+      if (notesCol === undefined) {
+        notesCol = headers.length;
+        mxSheet.getRange(1, notesCol + 1).setValue("Notes");
+        headers.push("Notes");
+      }
+      var existingNotes = mxSheet.getRange(rowToUpdate, notesCol + 1).getValue() || "";
+      var newNote = "[" + Utilities.formatDate(new Date(), "GMT+7", "MM/dd HH:mm") + "] " + user + " (" + division + "): " + newStatus + " - " + notes;
+      mxSheet.getRange(rowToUpdate, notesCol + 1).setValue(existingNotes + "\n" + newNote);
+    }
+    
+    // Write to Audit Log (Hidden/Optional)
+    var logSheet = getSheetByName(MATRIX_ID, "Audit Log");
+    if (logSheet) {
+      logSheet.appendRow([new Date(), user, taskId, division, newStatus, notes || ""]);
+    }
+    
+    SpreadsheetApp.flush();
+    
+    // Notifications
+    if (newStatus === "Approved" || newStatus === "Revisi") {
+      var msg = "🚨 *Maxtring Update*\n\nTask: " + taskId + "\nDivisi: " + division + "\nStatus: *" + newStatus + "*\nOleh: " + user + (notes ? "\nCatatan: " + notes : "");
+      sendWhatsAppMessage("6285233142178", msg); // Send to CMO (Dummy number)
+    }
+    
+    return { success: true };
+    
   } catch (e) {
     return { error: e.toString() };
   } finally {
