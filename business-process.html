@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Process - Maxtring</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-brand">Maxtring</div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="calendar.html" class="nav-item">Calendar</a>
+            <a href="public-matrix.html" class="nav-item">Public Matrix</a>
+            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;">Content Bank</a>
+            <a href="business-process.html" class="nav-item active">Business Process</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
+        </div>
+    </nav>
+    
+    <main class="container animate-fade-in" style="flex: 1; max-width: 800px;">
+        <h1 style="margin-bottom: 2rem;">Standard Operating Procedure (SOP) 📖</h1>
+        
+        <div class="card glass" style="margin-bottom: 2rem;">
+            <h2>1. Tahap Ideation (SMS Content Bank)</h2>
+            <ul style="margin-left: 1.5rem; margin-top: 1rem; color: var(--text-muted); line-height: 1.8;">
+                <li>Tim SMS mencari dan mensubmit ide konten harian ke Content Bank.</li>
+                <li>Reviewer (Head/Co-Head/CMO) mereview ide. Ide yang di-Accepted masuk ke kolam ide siap pakai.</li>
+            </ul>
+        </div>
+
+        <div class="card glass" style="margin-bottom: 2rem;">
+            <h2>2. Penjadwalan (Matrix All Marketing)</h2>
+            <ul style="margin-left: 1.5rem; margin-top: 1rem; color: var(--text-muted); line-height: 1.8;">
+                <li>Head/Co-Head SMS memilih ide dari kolam Accepted.</li>
+                <li>Ide dijadwalkan dan statusnya diubah menjadi <strong>Scheduled</strong>.</li>
+            </ul>
+        </div>
+
+        <div class="card glass">
+            <h2>3. Eksekusi Lintas Divisi</h2>
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.02); border-radius: 8px;">
+                <p style="margin-bottom: 0.5rem;"><strong>Alur Kerja:</strong></p>
+                <code style="display: block; white-space: pre; color: var(--primary);">
+SMS mengisi ide & arahan
+  ↓
+CW membuat Brief
+  ↓
+QC oleh Head/Co-Head CW -> [Approved]
+  ↓
+GD membuat Design
+  ↓
+QC oleh Head/Co-Head GD -> [Approved]
+  ↓
+(Jika Reels: Talent membuat video -> QC C-Level)
+  ↓
+Semua aset lengkap -> SMS Upload
+                </code>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth();
+            if (user && (user.role === 'SMS' || user.role === 'CMO')) {
+                document.getElementById('nav-content-bank').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

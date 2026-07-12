@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Maxtring</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-brand">Maxtring</div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="calendar.html" class="nav-item active">Calendar</a>
+            <a href="public-matrix.html" class="nav-item">Public Matrix</a>
+            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;">Content Bank</a>
+            <a href="business-process.html" class="nav-item">Business Process</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
+        </div>
+    </nav>
+    
+    <main class="container animate-fade-in" style="flex: 1;">
+        <h1 style="margin-bottom: 2rem;">Kalender Konten 📅</h1>
+        
+        <div class="card glass" style="text-align: center; padding: 4rem;">
+            <p style="font-size: 1.2rem; color: var(--text-muted);">
+                Tampilan Kalender akan menampilkan grid tanggal dengan status warna (hijau, kuning, merah) dari task yang berjalan.
+            </p>
+            <p style="margin-top: 1rem;">
+                *Ini adalah mockup UI. Data jadwal nyata akan dihubungkan di tahap selanjutnya.*
+            </p>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = checkAuth();
+            if (user && (user.role === 'SMS' || user.role === 'CMO')) {
+                document.getElementById('nav-content-bank').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

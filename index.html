@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Maxtring</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="theme-toggle" class="theme-toggle" style="position: absolute; top: 1rem; right: 1rem;">🌙</button>
+    
+    <div class="login-container">
+        <div class="login-card card glass animate-fade-in">
+            <div class="login-logo">🚀</div>
+            <h1 class="nav-brand" style="font-size: 2rem; margin-bottom: 0.5rem;">Maxtring</h1>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Matrix All Marketing - Job On Yours</p>
+            
+            <form id="login-form">
+                <div class="form-group" style="text-align: left;">
+                    <label class="form-label" for="username">Role ID</label>
+                    <input type="text" id="username" class="form-input" placeholder="contoh: cwjoy, cmo" required>
+                </div>
+                
+                <div class="form-group" style="text-align: left;">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input" placeholder="Masukkan password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Lanjut Pilih Nama &rarr;
+                </button>
+            </form>
+            
+            <form id="name-form" style="display: none; margin-top: 1rem;">
+                <div class="form-group" style="text-align: left;">
+                    <label class="form-label" for="name-select">Pilih Nama Kamu</label>
+                    <select id="name-select" class="form-select" required>
+                        <option value="">-- Pilih Nama --</option>
+                        <!-- Akan diisi oleh JS -->
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Masuk Dashboard
+                </button>
+            </form>
+            
+        </div>
+    </div>
+    
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if already logged in
+            if (localStorage.getItem('maxtring_user')) {
+                window.location.href = 'dashboard.html';
+            }
+            
+            let tempUserData = null;
+            
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const user = document.getElementById('username').value;
+                const pass = document.getElementById('password').value;
+                
+                const result = await callApi('login', { username: user, password: pass });
+                
+                if (result && result.success) {
+                    tempUserData = { role: result.role, type: result.type };
+                    
+                    // Populate names dropdown
+                    const select = document.getElementById('name-select');
+                    select.innerHTML = '<option value="">-- Pilih Nama --</option>';
+                    
+                    if (result.team && result.team.length > 0) {
+                        result.team.forEach(member => {
+                            const option = document.createElement('option');
+                            option.value = member.nama;
+                            option.textContent = member.nama;
+                            select.appendChild(option);
+                        });
+                    } else {
+                        // Fallback if no team data
+                        const option = document.createElement('option');
+                        option.value = "User Default";
+                        option.textContent = "User Default (Tidak ada data tim)";
+                        select.appendChild(option);
+                    }
+                    
+                    // Switch forms
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('name-form').style.display = 'block';
+                    document.getElementById('name-form').classList.add('animate-fade-in');
+                } else if (result) {
+                    alert(result.message || "Gagal login");
+                }
+            });
+            
+            document.getElementById('name-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const selectedName = document.getElementById('name-select').value;
+                
+                if (selectedName && tempUserData) {
+                    tempUserData.name = selectedName;
+                    localStorage.setItem('maxtring_user', JSON.stringify(tempUserData));
+                    window.location.href = 'dashboard.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Bank - Maxtring</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-brand">Maxtring</div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="calendar.html" class="nav-item">Calendar</a>
+            <a href="public-matrix.html" class="nav-item">Public Matrix</a>
+            <a href="content-bank.html" class="nav-item active" id="nav-content-bank">Content Bank</a>
+            <a href="business-process.html" class="nav-item">Business Process</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
+        </div>
+    </nav>
+    
+    <main class="container animate-fade-in" style="flex: 1;">
+        <h1 style="margin-bottom: 2rem;">Kolam Ide (Content Bank) 💡</h1>
+        
+        <div class="card glass">
+            <div class="table-container">
+                <table id="ideas-table">
+                    <thead>
+                        <tr>
+                            <th>ID Ide</th>
+                            <th>Pillar</th>
+                            <th>Judul Konten</th>
+                            <th>Pengusul</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ideas-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 2rem;">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth('SMS'); // Hanya SMS & CMO yg boleh masuk
+            if (!user) return;
+            
+            const result = await callApi('getContentBankData', { month: 'Juni' });
+            const tbody = document.getElementById('ideas-body');
+            
+            if (result && result.success && result.data.length > 0) {
+                let html = '';
+                result.data.forEach(row => {
+                    let statusClass = 'badge-ns';
+                    const status = row["Status"] || 'Unreviewed';
+                    
+                    if(status === 'Accepted') statusClass = 'badge-sub';
+                    if(status === 'Scheduled') statusClass = 'badge-prog';
+                    if(status === 'Posted') statusClass = 'badge-post';
+                    
+                    html += `
+                        <tr>
+                            <td style="font-family: monospace;">${row["ID"] || '-'}</td>
+                            <td>${row["Pillar"] || '-'}</td>
+                            <td style="font-weight: 500;">${row["Judul"] || '-'}</td>
+                            <td>${row["Pengusul"] || '-'}</td>
+                            <td><span class="badge ${statusClass}">${status}</span></td>
+                            <td>
+                                ${status === 'Accepted' ? `<button class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="scheduleIdea('${row["ID"]}', '${row["Judul"]}')">Schedule</button>` : '-'}
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">Tidak ada data ide.</td></tr>`;
+            }
+        });
+        
+        async function scheduleIdea(id, title) {
+            const date = prompt(`Masukkan tanggal tayang untuk "${title}" (YYYY-MM-DD):`);
+            if (date) {
+                const res = await callApi('scheduleIdea', {
+                    ideaData: {
+                        id: id,
+                        title: title,
+                        date: date,
+                        month: 'Juni'
+                    }
+                });
+                
+                if (res && res.success) {
+                    alert(`Berhasil dijadwalkan ke Matrix!\nTask ID: ${res.taskId}`);
+                    window.location.reload();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

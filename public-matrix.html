@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Matrix - Maxtring</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar glass">
+        <div class="nav-brand">Maxtring</div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-item">Dashboard</a>
+            <a href="calendar.html" class="nav-item">Calendar</a>
+            <a href="public-matrix.html" class="nav-item active">Public Matrix</a>
+            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;">Content Bank</a>
+            <a href="business-process.html" class="nav-item">Business Process</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="theme-toggle">🌙</button>
+        </div>
+    </nav>
+    
+    <main class="container animate-fade-in" style="flex: 1; max-width: 1400px;">
+        <h1 style="margin-bottom: 0.5rem;">Matrix All Marketing 📋</h1>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Tampilan transparan dari seluruh jadwal dan status konten. (Read-Only)</p>
+        
+        <div class="card glass">
+            <div class="table-container">
+                <table id="matrix-table" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th>Task ID</th>
+                            <th>Tanggal</th>
+                            <th>Judul</th>
+                            <th>CW Status</th>
+                            <th>GD Status</th>
+                            <th>Talent Status</th>
+                            <th>Overall Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matrix-body">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 2rem;">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth(); // Semua bisa akses
+            if (!user) return;
+            
+            if (user.role === 'SMS' || user.role === 'CMO') {
+                document.getElementById('nav-content-bank').style.display = 'block';
+            }
+            
+            const result = await callApi('getMatrixData', { month: 'Juni' });
+            const tbody = document.getElementById('matrix-body');
+            
+            if (result && result.success && result.data.length > 0) {
+                let html = '';
+                result.data.forEach(row => {
+                    html += `
+                        <tr>
+                            <td style="font-family: monospace;">${row["Task ID"] || '-'}</td>
+                            <td>${row["Date"] || '-'}</td>
+                            <td style="font-weight: 500;">${row["Judul"] || row["Idea"] || '-'}</td>
+                            <td><span class="badge ${getBadgeClass(row["CW Status"])}">${row["CW Status"] || 'Not Started'}</span></td>
+                            <td><span class="badge ${getBadgeClass(row["GD Status"])}">${row["GD Status"] || 'Not Started'}</span></td>
+                            <td><span class="badge ${getBadgeClass(row["Talent Status"])}">${row["Talent Status"] || 'Not Started'}</span></td>
+                            <td><span class="badge ${getBadgeClass(row["Overall Status"], true)}">${row["Overall Status"] || 'Not Started'}</span></td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } else {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Tidak ada data Matrix.</td></tr>`;
+            }
+        });
+        
+        function getBadgeClass(status, isOverall = false) {
+            if (!status || status === 'Not Started') return 'badge-ns';
+            if (status === 'Approved') return 'badge-app';
+            if (status === 'Submitted' || status === 'On Process') return 'badge-prog';
+            if (status === 'Revisi') return 'badge-rev';
+            if (status === 'Posted' && isOverall) return 'badge-post';
+            return 'badge-ns';
+        }
+    </script>
+</body>
+</html>
