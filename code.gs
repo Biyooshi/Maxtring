@@ -277,6 +277,11 @@ function extractLinkFromCell(sheet, row, col) {
 }
 
 function getMatrixData(month) {
+  var cache = CacheService.getScriptCache();
+  var cacheKey = 'matrix_' + month;
+  var cached = cache.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
   try {
     var sheet = getMatrixSheet(MATRIX_ID, month);
     if (!sheet) return { error: "Tab '" + month + "' tidak ditemukan di Matrix. Cek nama tab spreadsheet." };
@@ -326,7 +331,9 @@ function getMatrixData(month) {
     Logger.log('getMatrixData: Total rows returned = ' + result.length);
     if (result.length > 0) Logger.log('getMatrixData: First row sample = ' + JSON.stringify(result[0]));
     
-    return { success: true, data: result };
+    var response = { success: true, data: result };
+    cache.put(cacheKey, JSON.stringify(response), 120);
+    return response;
   } catch(e) {
     Logger.log('getMatrixData ERROR: ' + e.toString());
     return { error: e.toString() };
@@ -394,6 +401,13 @@ function readPillarBlocksFromSheet(sheet) {
 }
 
 function getContentBankData(monthPrefix) {
+  var startTime = new Date().getTime();
+  
+  var cache = CacheService.getScriptCache();
+  var cacheKey = 'cb_' + monthPrefix;
+  var cached = cache.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
   try {
     var tabs = getContentBankTabsForMonth(monthPrefix);
     if (tabs.length === 0) {
@@ -429,8 +443,12 @@ function getContentBankData(monthPrefix) {
       });
     });
     
-    return { success: true, data: allResults };
+    var response = { success: true, data: allResults };
+    cache.put(cacheKey, JSON.stringify(response), 120);
+    Logger.log("getContentBankData selesai dalam " + (new Date().getTime() - startTime) + "ms, total baris: " + allResults.length);
+    return response;
   } catch (e) {
+    Logger.log("getContentBankData ERROR setelah " + (new Date().getTime() - startTime) + "ms: " + e.toString());
     return { error: e.toString() };
   }
 }

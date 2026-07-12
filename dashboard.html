@@ -9,13 +9,13 @@
 </head>
 <body>
     <nav class="navbar glass">
-        <div class="nav-brand">Maxtring</div>
+        <a href="https://maxtring.vercel.app" style="display:flex;align-items:center;text-decoration:none;"><img src="/blue2.png" alt="Maxtring" style="height:38px;width:auto;"></a>
         <div class="nav-links">
-            <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard</a>
-            <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
-            <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
-            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
-            <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
+            <a href="/dashboard" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/calendar" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="/content-bank" class="nav-item" id="nav-content-bank"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
+            <a href="/public-matrix" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
+            <a href="/business-process" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
         </div>
         <div class="flex items-center gap-4">
             <span id="user-info" style="font-weight: 600; font-size: 0.9rem;">
@@ -28,10 +28,11 @@
     
     <!-- Mobile Bottom Nav -->
     <div class="nav-bottom">
-        <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i></a>
-        <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
-        <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i></a>
-        <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i></a>
+        <a href="/dashboard" class="nav-item active"><i class="fa-solid fa-house"></i></a>
+        <a href="/calendar" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="/content-bank" class="nav-item"><i class="fa-solid fa-lightbulb"></i></a>
+        <a href="/public-matrix" class="nav-item"><i class="fa-solid fa-table"></i></a>
+        <a href="/business-process" class="nav-item"><i class="fa-solid fa-book"></i></a>
     </div>
     
     <main class="container animate-fade-up">
@@ -138,8 +139,10 @@
     </div>
     
     <footer>
-        <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
-        <p><a href="https://www.instagram.com/biyoosh.i/" target="_blank"><i class="fa-brands fa-instagram"></i> @biyoosh.i</a></p>
+        <p>
+            <a href="https://www.instagram.com/biyoosh.i/" target="_blank" style="color:inherit;font-weight:600;">Made by Muhammad Nurul Qolbi (CMO - JOY)</a>
+            &copy; 2026
+        </p>
     </footer>
     
     <div id="loader">
@@ -172,7 +175,9 @@
                 // Analytics counters
                 let statusCounts = { "Not Started": 0, "On Process": 0, "Approved": 0, "Posted": 0 };
                 
-                const filteredData = data.filter(row => {
+                const myFilteredTasks = filterTasksForUser(data, user);
+
+                const filteredData = myFilteredTasks.filter(row => {
                     const computedStatus = computeOverallStatus(row);
                     row["Overall Status"] = computedStatus; // Override
                     
@@ -181,16 +186,13 @@
                     if (user.role === 'CMO') return true;
                     if (computedStatus === "DONE") return false; // Hide done for clean view
                     
-                    // Simple routing: if staff/head, they see everything for now for demo purposes, 
-                    // ideally we filter by PIC Name here if that column existed.
                     return true; 
                 });
                 
                 filteredData.forEach(row => {
                     activeCount++;
                     
-                    let targetCol = user.role === 'CMO' ? "Overall Status" : `${user.role} Status`;
-                    let myStatus = row[targetCol] || "Not Started";
+                    let myStatus = computeMyTaskStatus(row, user);
                     
                     if (myStatus === "On Process" || myStatus === "Submitted") progCount++;
                     if (myStatus === "Revisi") revCount++;
@@ -256,7 +258,21 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             plugins: {
-                                legend: { position: 'right' }
+                                legend: {
+                                    display: true,
+                                    position: 'right',
+                                    labels: {
+                                        generateLabels: function(chart) {
+                                            const data = chart.data;
+                                            return data.labels.map((label, i) => ({
+                                                text: `${label}: ${data.datasets[0].data[i]}`,
+                                                fillStyle: data.datasets[0].backgroundColor[i],
+                                                strokeStyle: data.datasets[0].backgroundColor[i],
+                                                index: i
+                                            }));
+                                        }
+                                    }
+                                }
                             }
                         }
                     });

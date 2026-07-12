@@ -8,13 +8,13 @@
 </head>
 <body>
     <nav class="navbar glass">
-        <div class="nav-brand">Maxtring</div>
+        <a href="https://maxtring.vercel.app" style="display:flex;align-items:center;text-decoration:none;"><img src="/blue2.png" alt="Maxtring" style="height:38px;width:auto;"></a>
         <div class="nav-links">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
-            <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
-            <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
-            <a href="content-bank.html" class="nav-item" id="nav-content-bank" style="display: none;"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
-            <a href="business-process.html" class="nav-item active"><i class="fa-solid fa-book"></i> SOP</a>
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/calendar" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="/content-bank" class="nav-item" id="nav-content-bank"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
+            <a href="/public-matrix" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
+            <a href="/business-process" class="nav-item active"><i class="fa-solid fa-book"></i> SOP</a>
         </div>
         <div class="flex items-center gap-4">
             <button id="theme-toggle" class="theme-toggle glass" style="width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; color: var(--text-main);"><i class="fa-solid fa-moon"></i></button>
@@ -23,10 +23,11 @@
     </nav>
     
     <div class="nav-bottom">
-        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i></a>
-        <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
-        <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i></a>
-        <a href="business-process.html" class="nav-item active"><i class="fa-solid fa-book"></i></a>
+        <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="/calendar" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="/content-bank" class="nav-item"><i class="fa-solid fa-lightbulb"></i></a>
+        <a href="/public-matrix" class="nav-item"><i class="fa-solid fa-table"></i></a>
+        <a href="/business-process" class="nav-item active"><i class="fa-solid fa-book"></i></a>
     </div>
     
     <main class="container animate-fade-up" style="max-width: 900px;">
@@ -195,8 +196,10 @@
     </main>
 
     <footer>
-        <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
-        <p><a href="https://www.instagram.com/biyoosh.i/" target="_blank"><i class="fa-brands fa-instagram"></i> @biyoosh.i</a></p>
+        <p>
+            <a href="https://www.instagram.com/biyoosh.i/" target="_blank" style="color:inherit;font-weight:600;">Made by Muhammad Nurul Qolbi (CMO - JOY)</a>
+            &copy; 2026
+        </p>
     </footer>
 
     <script src="script.js"></script>

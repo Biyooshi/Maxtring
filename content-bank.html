@@ -8,13 +8,13 @@
 </head>
 <body>
     <nav class="navbar glass">
-        <div class="nav-brand">Maxtring</div>
+        <a href="https://maxtring.vercel.app" style="display:flex;align-items:center;text-decoration:none;"><img src="/blue2.png" alt="Maxtring" style="height:38px;width:auto;"></a>
         <div class="nav-links">
-            <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
-            <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
-            <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
-            <a href="content-bank.html" class="nav-item active" id="nav-content-bank"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
-            <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="/calendar" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+            <a href="/content-bank" class="nav-item active" id="nav-content-bank"><i class="fa-solid fa-lightbulb"></i> Content Bank</a>
+            <a href="/public-matrix" class="nav-item"><i class="fa-solid fa-table"></i> Public Matrix</a>
+            <a href="/business-process" class="nav-item"><i class="fa-solid fa-book"></i> SOP</a>
         </div>
         <div class="flex items-center gap-4">
             <span id="user-info" style="font-weight: 600; font-size: 0.9rem;">
@@ -26,17 +26,18 @@
     </nav>
     
     <div class="nav-bottom">
-        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i></a>
-        <a href="calendar.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
-        <a href="public-matrix.html" class="nav-item"><i class="fa-solid fa-table"></i></a>
-        <a href="business-process.html" class="nav-item"><i class="fa-solid fa-book"></i></a>
+        <a href="/dashboard" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="/calendar" class="nav-item"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="/content-bank" class="nav-item active"><i class="fa-solid fa-lightbulb"></i></a>
+        <a href="/public-matrix" class="nav-item"><i class="fa-solid fa-table"></i></a>
+        <a href="/business-process" class="nav-item"><i class="fa-solid fa-book"></i></a>
     </div>
     
     <main class="container animate-fade-up">
         <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
             <div>
                 <h1 style="font-size: 2rem;"><i class="fa-solid fa-lightbulb" style="color: var(--accent);"></i> Content Bank</h1>
-                <p class="text-muted" style="font-size: 1.1rem;">Daftar ide konten dari tim SMS, dikelompokkan per pillar. (Akses: SMS & CMO)</p>
+                <p class="text-muted" style="font-size: 1.1rem;">Daftar ide konten dari tim SMS, dikelompokkan per pillar. </p>
             </div>
             <div style="display:flex;gap:0.5rem;">
                 <button class="btn btn-primary btn-sm" onclick="openModal('modal-submit-idea')">
@@ -97,7 +98,10 @@
     </main>
     
     <footer>
-        <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
+        <p>
+            <a href="https://www.instagram.com/biyoosh.i/" target="_blank" style="color:inherit;font-weight:600;">Made by Muhammad Nurul Qolbi (CMO - JOY)</a>
+            &copy; 2026
+        </p>
     </footer>
 
     <div id="loader">
@@ -270,7 +274,7 @@
             const user = checkAuth('SMS'); // Hanya SMS & CMO
             if (!user) return;
             showLoading();
-            const result = await callApi('getContentBankData', { month: CONTENT_BANK_MONTH_PREFIX });
+            const result = await callApiWithTimeout('getContentBankData', { month: CONTENT_BANK_MONTH_PREFIX });
             hideLoading();
             
             if (result && result.success) {

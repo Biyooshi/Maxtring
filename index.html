@@ -62,7 +62,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('maxtring_user')) {
-                window.location.href = 'dashboard.html';
+                window.location.href = '/dashboard';
             }
             
             let tempUserData = null;
@@ -109,7 +109,7 @@
                 if (selectedName && tempUserData) {
                     tempUserData.name = selectedName;
                     localStorage.setItem('maxtring_user', JSON.stringify(tempUserData));
-                    window.location.href = 'dashboard.html';
+                    window.location.href = '/dashboard';
                 }
             });
         });

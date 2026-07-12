@@ -49,6 +49,41 @@ function computeOverallStatus(row) {
   return 'PENDING';
 }
 
+function computeMyTaskStatus(row, user) {
+  if (user.role === 'CMO') return computeOverallStatus(row);
+
+  switch (user.role) {
+    case 'CW':
+      return row['Brief CW'] ? 'Submitted' : 'Not Started';
+    case 'GD':
+      return row['Design GD'] ? 'Submitted' : 'Not Started';
+    case 'Talent':
+      return row['LINK VIDEO'] ? 'Submitted' : 'Not Started';
+    case 'SMS':
+      return (row['Status Upload SMS'] || '').toLowerCase() === 'posted' ? 'Posted' : 'Not Started';
+    default:
+      return 'Not Started';
+  }
+}
+
+function getPICColumnForRole(role) {
+  const map = { 'CW': 'PJ CW', 'GD': 'PJ GD', 'SMS': 'PJ SMS', 'Talent': 'PJ TALENT' };
+  return map[role] || null;
+}
+
+function filterTasksForUser(allTasks, user) {
+  if (user.role === 'CMO') return allTasks;
+
+  const picCol = getPICColumnForRole(user.role);
+  if (!picCol) return allTasks;
+
+  if (user.type === 'head') {
+    return allTasks.filter(row => !!(row[picCol] || '').trim());
+  }
+
+  return allTasks.filter(row => (row[picCol] || '').trim().toLowerCase() === user.name.trim().toLowerCase());
+}
+
 
 // ============================================
 // THEME MANAGEMENT
@@ -113,8 +148,25 @@ async function callApi(action, data = {}) {
     if (loader) loader.classList.remove('active');
     console.error("Network Error:", error);
     alert("Koneksi gagal. Periksa jaringan Anda.");
-    return null;
+    return { error: error.message };
   }
+}
+
+function showLoading() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.classList.add('active');
+}
+
+function hideLoading() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.classList.remove('active');
+}
+
+async function callApiWithTimeout(action, data = {}, timeoutMs = 15000) {
+  return Promise.race([
+    callApi(action, data),
+    new Promise((resolve) => setTimeout(() => resolve({ error: "Timeout: request lebih dari 15 detik, kemungkinan backend hang atau data terlalu besar." }), timeoutMs))
+  ]);
 }
 
 // ============================================
@@ -123,13 +175,13 @@ async function callApi(action, data = {}) {
 function checkAuth(requireRole = null) {
   const user = JSON.parse(localStorage.getItem('maxtring_user'));
   if (!user) {
-    window.location.href = 'index.html';
+    window.location.href = '/';
     return null;
   }
 
   if (requireRole && user.role !== requireRole && user.role !== 'CMO') {
     alert("Akses Ditolak: Anda tidak memiliki izin untuk halaman ini.");
-    window.location.href = 'dashboard.html';
+    window.location.href = '/dashboard';
     return null;
   }
 
@@ -155,7 +207,7 @@ function checkAuth(requireRole = null) {
 
 function logout() {
   localStorage.removeItem('maxtring_user');
-  window.location.href = 'index.html';
+  window.location.href = '/';
 }
 
 // ============================================
