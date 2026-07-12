@@ -103,8 +103,8 @@ async function callApi(action, data = {}) {
 
     if (result.error) {
       console.error("API Error:", result.error);
-      alert("Terjadi kesalahan: " + result.error);
-      return null;
+      // Removed alert popup as per user request to fail silently on missing tabs
+      return result;
     }
 
     return result;
