@@ -2,52 +2,45 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
 :root {
-  /* HSL Color Palette for richer aesthetics */
-  --hue-primary: 230; /* Indigo/Blue */
-  --primary: hsl(var(--hue-primary), 80%, 60%);
-  --primary-hover: hsl(var(--hue-primary), 80%, 50%);
-  --primary-light: hsl(var(--hue-primary), 80%, 90%);
+  /* =============================================
+   * JOY / Morpest Color System — Single Source of Truth
+   * ============================================= */
+  --primary:        #2f668f;   /* joy-bg */
+  --primary-hover:  #255273;
+  --accent:         #f16527;   /* joy-accent */
+  --accent-hover:   #df6631;   /* joy-hover */
+  --bg-color:       #f0f9ff;   /* joy-light */
   
-  --secondary: hsl(150, 60%, 50%); /* Green */
-  --accent: hsl(35, 90%, 55%); /* Orange/Amber */
-  --danger: hsl(350, 80%, 55%); /* Red */
-  --purple: hsl(270, 70%, 60%);
+  --secondary:  #10B981;       /* Green — Approved */
+  --danger:     #EF4444;       /* Red   — Revisi/Error */
+  --purple:     #8B5CF6;       /* Purple — Posted */
   
-  /* Neutral / Backgrounds */
-  --bg-color: hsl(220, 20%, 97%);
-  /* Joy Morpest Color Palette */
-  --primary: #2f668f;
-  --primary-hover: #255273;
-  --secondary: #10B981;
-  --accent: #f16527;
-  --accent-hover: #df6631;
-  --danger: #EF4444;
-  --bg-color: #f0f9ff;
-  --surface: #FFFFFF;
-  --text-main: #111827;
-  --text-muted: #6B7280;
-  --border: #E5E7EB;
+  --surface:     #FFFFFF;
+  --text-main:   #111827;
+  --text-muted:  #6B7280;
+  --border:      #E5E7EB;
   
-  /* Status Colors */
-  --status-ns: #9CA3AF;
-  --status-prog: #f16527;
-  --status-rev: #EF4444;
-  --status-app: #10B981;
-  --status-post: #8B5CF6;
+  /* Status badge colors */
+  --status-ns:   #9CA3AF;   /* Not Started — Gray */
+  --status-prog: #f16527;   /* In Progress — Orange */
+  --status-rev:  #EF4444;   /* Revisi      — Red */
+  --status-app:  #10B981;   /* Approved    — Green */
+  --status-post: #8B5CF6;   /* Posted      — Purple */
+  --status-sub:  #3B82F6;   /* Submitted   — Blue */
   
-  /* Utilities */
+  /* Layout */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
-  --shadow-sm: 0 4px 6px -1px rgba(47, 102, 143, 0.1);
-  --shadow-md: 0 10px 15px -3px rgba(47, 102, 143, 0.15);
-  --shadow-glow: 0 0 20px rgba(241, 101, 39, 0.15);
+  --shadow-sm:   0 4px  6px  -1px rgba(47, 102, 143, 0.10);
+  --shadow-md:   0 10px 15px -3px rgba(47, 102, 143, 0.15);
+  --shadow-glow: 0 0 24px rgba(241, 101, 39, 0.18);
   
-  --glass-bg: hsla(0, 0%, 100%, 0.7);
-  --glass-border: hsla(0, 0%, 100%, 0.5);
+  --glass-bg:     hsla(0, 0%, 100%, 0.72);
+  --glass-border: hsla(0, 0%, 100%, 0.50);
   
   --font-family: 'Inter', -apple-system, sans-serif;
-  --nav-height: 70px;
+  --nav-height:  70px;
 }
 
 [data-theme="dark"] {

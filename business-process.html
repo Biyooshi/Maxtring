@@ -33,64 +33,163 @@
         <div style="text-align: center; margin-bottom: 3rem;">
             <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--primary);"><i class="fa-solid fa-book-open"></i></div>
             <h1 style="font-size: 2.5rem;">SOP & Alur Kerja</h1>
-            <p class="text-muted" style="font-size: 1.1rem;">Standar operasional prosedur pengisian Matrix All Marketing.</p>
+            <p class="text-muted" style="font-size: 1.1rem;">Alur kerja lengkap JOY All-Marketing Batch 3 (termasuk cabang konten Reels dengan divisi Talent).</p>
         </div>
         
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem; margin-top: 3rem;">
-            <!-- Row 1: SMS -->
-            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap;">
-                <div class="fc-start-end">Start</div>
-                <div class="fc-arrow-right"></div>
-                <div class="fc-node" style="background: var(--accent); color: white; border: none;">SMS Mencari<br>Ide Konten</div>
-                <div class="fc-arrow-right"></div>
-                <div class="fc-diamond"><span>Review<br>Head SMS</span></div>
-                <div class="fc-arrow-right"></div>
-                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Ide masuk ke<br>Matrix</div>
-                <div class="fc-arrow-right"></div>
-                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Konfirmasi<br>Grup & Head CW</div>
+        <div style="max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 0; align-items: center;">
+            
+            <!-- LEGEND -->
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;font-size:0.8rem;">
+                <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:14px;height:14px;border-radius:50%;background:var(--accent);display:inline-block;"></span> Divisi SMS</span>
+                <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:14px;height:14px;border-radius:50%;background:#f59e0b;display:inline-block;"></span> Divisi CW</span>
+                <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:14px;height:14px;border-radius:50%;background:#10b981;display:inline-block;"></span> Divisi GD</span>
+                <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:14px;height:14px;border-radius:50%;background:#8B5CF6;display:inline-block;"></span> Divisi Talent</span>
+                <span style="display:flex;align-items:center;gap:0.4rem;"><span style="width:14px;height:14px;background:#2563eb;transform:rotate(45deg);display:inline-block;"></span> Review / Keputusan</span>
             </div>
             
+            <!-- START -->
+            <div class="fc-start-end">🚀 Start</div>
             <div class="fc-arrow-down"></div>
             
-            <!-- Row 2: CW -->
-            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap; flex-direction: row-reverse;">
-                <div class="fc-node" style="background: #f59e0b; color: white; border: none;">Head CW bagi<br>pekerjaan</div>
-                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
-                <div class="fc-node" style="background: #f59e0b; color: white; border: none;">CW buat<br>konten & Submit</div>
-                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
-                <div class="fc-diamond" style="background: #2563eb;"><span>Review<br>Head CW</span></div>
-                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
-                <div class="fc-node" style="background: #f59e0b; color: white; border: none;">ACC:<br>Konfirmasi Grup</div>
+            <!-- STEP 1: SMS Ideation -->
+            <div style="background:var(--accent);color:white;border-radius:var(--radius-sm);padding:1rem 1.5rem;text-align:center;font-weight:600;box-shadow:var(--shadow-sm);min-width:200px;">
+                <div style="font-size:0.7rem;opacity:0.8;margin-bottom:0.2rem;">① DIVISI SMS</div>
+                SMS mencari ide konten<br>→ Isi Content Bank
             </div>
-            
             <div class="fc-arrow-down"></div>
             
-            <!-- Row 3: GD -->
-            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap;">
-                <div class="fc-node" style="background: #10b981; color: white; border: none;">GD Terima Brief<br>& Buat Design</div>
-                <div class="fc-arrow-right"></div>
-                <div class="fc-node" style="background: #10b981; color: white; border: none;">Kirim Konten<br>& Konfirmasi</div>
-                <div class="fc-arrow-right"></div>
-                <div class="fc-diamond" style="background: #059669;"><span>Review<br>Head GD</span></div>
-                <div class="fc-arrow-right"></div>
-                <div class="fc-node" style="background: #10b981; color: white; border: none;">ACC:<br>Konfirmasi Grup</div>
+            <!-- REVIEW 1: Head SMS -->
+            <div class="fc-diamond" style="background:#2563eb;">
+                <span>Review<br>Head SMS</span>
             </div>
-            
+            <div style="display:flex;gap:3rem;align-items:flex-start;margin-top:-0.5rem;">
+                <div style="text-align:center;font-size:0.75rem;color:var(--danger);"><i class="fa-solid fa-arrow-left"></i> Rejected<br><span style="color:var(--text-muted)">Ide dibuang</span></div>
+                <div style="text-align:center;font-size:0.75rem;color:var(--secondary);">Accepted <i class="fa-solid fa-arrow-down"></i></div>
+            </div>
             <div class="fc-arrow-down"></div>
             
-            <!-- Row 4: SMS End -->
-            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap; flex-direction: row-reverse;">
-                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Terima Aset<br>Visual & Teks</div>
-                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
-                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Posting ke<br>Sosmed JOY</div>
-                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
-                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Update Status<br>"Posted"</div>
-                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
-                <div class="fc-start-end">End</div>
+            <!-- STEP 2: Schedule -->
+            <div style="background:var(--accent);color:white;border-radius:var(--radius-sm);padding:1rem 1.5rem;text-align:center;font-weight:600;box-shadow:var(--shadow-sm);min-width:200px;">
+                <div style="font-size:0.7rem;opacity:0.8;margin-bottom:0.2rem;">② DIVISI SMS</div>
+                Jadwalkan ide ke Matrix<br>
+                <small style="opacity:0.8;">(via Calendar drag & drop)</small>
+            </div>
+            <div class="fc-arrow-down"></div>
+            
+            <!-- STEP 3: CW Brief -->
+            <div style="background:#f59e0b;color:white;border-radius:var(--radius-sm);padding:1rem 1.5rem;text-align:center;font-weight:600;box-shadow:var(--shadow-sm);min-width:200px;">
+                <div style="font-size:0.7rem;opacity:0.8;margin-bottom:0.2rem;">③ DIVISI CW</div>
+                CW membuat Teks/Skrip<br>
+                <small style="opacity:0.8;">Deadline: H-3</small>
+            </div>
+            <div class="fc-arrow-down"></div>
+            
+            <!-- REVIEW 2: Head CW -->
+            <div class="fc-diamond" style="background:#2563eb;">
+                <span>Review<br>Head CW</span>
+            </div>
+            <div style="display:flex;gap:3rem;align-items:flex-start;margin-top:-0.5rem;">
+                <div style="text-align:center;font-size:0.75rem;color:var(--danger);"><i class="fa-solid fa-arrow-up"></i> Revisi<br><span style="color:var(--text-muted)">Kembali ke CW</span></div>
+                <div style="text-align:center;font-size:0.75rem;color:var(--secondary);">Approved <i class="fa-solid fa-arrow-down"></i></div>
+            </div>
+            <div class="fc-arrow-down"></div>
+            
+            <!-- STEP 4: GD Design -->
+            <div style="background:#10b981;color:white;border-radius:var(--radius-sm);padding:1rem 1.5rem;text-align:center;font-weight:600;box-shadow:var(--shadow-sm);min-width:200px;">
+                <div style="font-size:0.7rem;opacity:0.8;margin-bottom:0.2rem;">④ DIVISI GD</div>
+                GD membuat Design/Visual<br>
+                <small style="opacity:0.8;">Deadline: H-2 | Berdasar brief CW</small>
+            </div>
+            <div class="fc-arrow-down"></div>
+            
+            <!-- REVIEW 3: Head GD -->
+            <div class="fc-diamond" style="background:#059669;">
+                <span>Review<br>Head GD</span>
+            </div>
+            <div style="display:flex;gap:3rem;align-items:flex-start;margin-top:-0.5rem;">
+                <div style="text-align:center;font-size:0.75rem;color:var(--danger);"><i class="fa-solid fa-arrow-up"></i> Revisi<br><span style="color:var(--text-muted)">Kembali ke GD</span></div>
+                <div style="text-align:center;font-size:0.75rem;color:var(--secondary);">Approved <i class="fa-solid fa-arrow-down"></i></div>
+            </div>
+            <div class="fc-arrow-down"></div>
+            
+            <!-- FORK: Feeds vs Reels -->
+            <div class="fc-diamond" style="background:var(--primary);width:150px;height:150px;">
+                <span style="font-size:0.85rem;">Jenis<br>Konten?</span>
             </div>
             
-            <div style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem; text-align: center;">
-                *Catatan: Jika ada penolakan (Rejected) pada fase review, task akan dikembalikan ke anggota divisi terkait untuk direvisi.
+            <!-- Branch Split -->
+            <div style="display:flex;gap:4rem;align-items:flex-start;margin-top:1rem;flex-wrap:wrap;justify-content:center;">
+                
+                <!-- LEFT: Feeds Branch -->
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;min-width:180px;">
+                    <div style="font-size:0.8rem;font-weight:600;color:#10b981;"><i class="fa-regular fa-image"></i> Feeds</div>
+                    <div class="fc-arrow-down"></div>
+                    <div style="background:#e0f2fe;color:#0369a1;border:2px dashed #0369a1;border-radius:var(--radius-sm);padding:0.8rem 1.2rem;text-align:center;font-size:0.9rem;font-weight:600;">
+                        Talent: <em>Skip</em><br>
+                        <small style="color:var(--text-muted)">Kolom LINK VIDEO = "-"</small>
+                    </div>
+                    <div class="fc-arrow-down"></div>
+                    <div style="background:var(--accent);color:white;border-radius:var(--radius-sm);padding:0.8rem 1.2rem;text-align:center;font-weight:600;font-size:0.9rem;">
+                        <div style="font-size:0.65rem;opacity:0.8;margin-bottom:0.2rem;">DIVISI SMS</div>
+                        Terima aset<br>caption + design<br>→ LANGSUNG UPLOAD
+                    </div>
+                </div>
+                
+                <!-- RIGHT: Reels Branch -->
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;min-width:180px;">
+                    <div style="font-size:0.8rem;font-weight:600;color:#8B5CF6;"><i class="fa-solid fa-film"></i> Reels</div>
+                    <div class="fc-arrow-down"></div>
+                    <div style="background:#8B5CF6;color:white;border-radius:var(--radius-sm);padding:0.8rem 1.2rem;text-align:center;font-weight:600;box-shadow:var(--shadow-sm);">
+                        <div style="font-size:0.65rem;opacity:0.8;margin-bottom:0.2rem;">⑤ DIVISI TALENT</div>
+                        Talent terima brief CW<br>→ Buat Video<br>
+                        <small style="opacity:0.8;">Deadline: H-2</small>
+                    </div>
+                    <div class="fc-arrow-down"></div>
+                    <div class="fc-diamond" style="background:#6D28D9;width:110px;height:110px;">
+                        <span style="font-size:0.75rem;">Review<br>C-Level</span>
+                    </div>
+                    <div style="display:flex;gap:2rem;font-size:0.72rem;color:var(--danger);">
+                        <span><i class="fa-solid fa-arrow-up"></i> Revisi → Talent</span>
+                    </div>
+                    <div style="background:#8B5CF6;color:white;border-radius:var(--radius-sm);padding:0.8rem 1.2rem;text-align:center;font-weight:600;font-size:0.9rem;">
+                        <div style="font-size:0.65rem;opacity:0.8;margin-bottom:0.2rem;">⑥ DIVISI GD</div>
+                        GD buat Cover Reels<br>
+                        <small style="opacity:0.8;">Berdasar video Talent</small>
+                    </div>
+                    <div class="fc-arrow-down"></div>
+                    <div class="fc-diamond" style="background:#059669;width:110px;height:110px;">
+                        <span style="font-size:0.75rem;">Review<br>Head GD</span>
+                    </div>
+                    <div style="font-size:0.72rem;color:var(--danger);">
+                        <i class="fa-solid fa-arrow-up"></i> Revisi → GD
+                    </div>
+                    <div class="fc-arrow-down"></div>
+                    <div style="background:var(--accent);color:white;border-radius:var(--radius-sm);padding:0.8rem 1.2rem;text-align:center;font-weight:600;font-size:0.9rem;">
+                        <div style="font-size:0.65rem;opacity:0.8;margin-bottom:0.2rem;">DIVISI SMS</div>
+                        Terima aset<br>caption + design + video<br>→ LANGSUNG UPLOAD
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Merge back -->
+            <div class="fc-arrow-down" style="margin-top:1rem;"></div>
+            
+            <!-- FINAL: Posted -->
+            <div style="background:var(--accent);color:white;border-radius:var(--radius-sm);padding:1rem 1.5rem;text-align:center;font-weight:600;box-shadow:var(--shadow-glow);min-width:200px;">
+                <div style="font-size:0.7rem;opacity:0.8;margin-bottom:0.2rem;">DIVISI SMS — Tanpa QC Tambahan</div>
+                Update Status → <strong>"Posted"</strong>
+            </div>
+            <div class="fc-arrow-down"></div>
+            
+            <div class="fc-start-end" style="background:#ffb6c1;border-color:#ff69b4;">🏁 End</div>
+            
+            <!-- FOOTNOTE -->
+            <div style="margin-top: 2.5rem; padding: 1rem 1.5rem; background: rgba(47,102,143,0.06); border-radius: var(--radius-sm); border-left: 3px solid var(--primary); font-size: 0.85rem; color: var(--text-muted); max-width: 620px; text-align: left;">
+                <strong>📌 Catatan Penting:</strong><br>
+                • Jika ada <strong>Revisi</strong> di tahap manapun, task dikembalikan ke anggota divisi terkait — bukan ke SMS.<br>
+                • SMS <strong>tidak melakukan QC tambahan</strong> setelah semua aset diterima — langsung upload di hari H.<br>
+                • Kolom <strong>LINK VIDEO</strong> dan <strong>PJ TALENT</strong> hanya wajib terisi untuk konten <strong>Reels</strong>. Untuk <strong>Feeds</strong>, kolom tersebut boleh dikosongkan.
             </div>
         </div>
     </main>
@@ -108,3 +207,4 @@
     </script>
 </body>
 </html>
+

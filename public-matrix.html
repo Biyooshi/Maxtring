@@ -53,13 +53,18 @@
                             <th>No</th>
                             <th>Upload Deadline</th>
                             <th>Day / Time</th>
+                            <th>Jenis Content</th>
                             <th>Content Ideas</th>
                             <th>References</th>
+                            <th>SMS Ideas Direction</th>
                             <th>Brief CW</th>
-                            <th>PIC CW</th>
-                            <th>Hasil Tulisan</th>
-                            <th>Hasil Design</th>
+                            <th>PJ CW</th>
+                            <th>Design GD</th>
+                            <th>PJ GD</th>
+                            <th>LINK VIDEO</th>
+                            <th>PJ TALENT</th>
                             <th>Status Upload SMS</th>
+                            <th>PJ SMS</th>
                             <th>Overall Status</th>
                         </tr>
                     </thead>
@@ -92,37 +97,49 @@
             if (result && result.success && result.data.length > 0) {
                 let html = '';
                 result.data.forEach(row => {
-                    // Ambil baris catatan terakhir jika ada, pisahkan dengan newline
-                    let notes = row["Notes"] || '-';
-                    let lastNote = '-';
-                    if(notes !== '-') {
-                        const noteArr = notes.split('\n').filter(n => n.trim() !== '');
-                        if(noteArr.length > 0) {
-                            lastNote = noteArr[noteArr.length - 1];
-                            // Potong jika terlalu panjang
-                            if(lastNote.length > 50) lastNote = lastNote.substring(0, 50) + '...';
-                        }
-                    }
+                    const jenisContent = (row['Jenis Content'] || row['_jenisContent'] || '').toLowerCase();
+                    const isReels = jenisContent === 'reels';
+                    
+                    // Helper: render a link cell
+                    const linkCell = (val, label) => val 
+                        ? `<a href="${val}" target="_blank" style="color:var(--accent);font-weight:600;">${label}</a>` 
+                        : '<span style="color:var(--text-muted)">-</span>';
+                    
+                    // For Feeds, Talent columns show a dash with note
+                    const talentVideo = isReels 
+                        ? linkCell(row['LINK VIDEO'], 'Link Video')
+                        : '<span style="color:var(--text-muted);font-size:0.8rem;font-style:italic;">Feeds</span>';
+                    const talentPJ = isReels ? (row['PJ TALENT'] || '-') 
+                        : '<span style="color:var(--text-muted);font-style:italic;">-</span>';
                     
                     html += `
                         <tr>
-                            <td style="font-family: monospace; font-weight: 600;">${row["No"] || '-'}</td>
-                            <td>${row["Upload Deadline"] || '-'}</td>
-                            <td>${row["Day Upload"] || '-'} <br> ${row["Time Upload"] || ''}</td>
-                            <td style="font-weight: 600; max-width: 200px;">${row["Content Ideas"] || '-'}</td>
-                            <td>${row["References"] ? `<a href="${row["References"]}" target="_blank">Link</a>` : '-'}</td>
-                            <td>${row["Brief CW"] || '-'}</td>
-                            <td>${row["PIC CW"] || '-'}</td>
-                            <td>${row["HASIL TULISAN (CHECK DISINI)"] ? `<a href="${row["HASIL TULISAN (CHECK DISINI)"]}" target="_blank">Link Drive</a>` : '-'}</td>
-                            <td>${row["HASIL DESIGN (CEK DISINI)"] ? `<a href="${row["HASIL DESIGN (CEK DISINI)"]}" target="_blank">Link Drive</a>` : '-'}</td>
-                            <td><span class="badge ${getBadgeClass(row["STATUS UPLOAD SMS"])}">${row["STATUS UPLOAD SMS"] || '-'}</span></td>
-                            <td><span class="badge ${getBadgeClass(row["Overall Status"])}">${row["Overall Status"] || 'Not Started'}</span></td>
+                            <td style="font-family:monospace;font-weight:600;">${row['No'] || '-'}</td>
+                            <td>${row['Upload Deadline'] || '-'}</td>
+                            <td>${row['Day Upload'] || '-'}<br><small style="color:var(--text-muted)">${row['Time Upload'] || ''}</small></td>
+                            <td>
+                                <span style="padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:600;background:${isReels ? 'rgba(139,92,246,0.12)' : 'rgba(16,185,129,0.12)'};color:${isReels ? 'var(--purple)' : 'var(--secondary)'}">
+                                    ${isReels ? '🎬 Reels' : '🖼️ Feeds'}
+                                </span>
+                            </td>
+                            <td style="font-weight:600;max-width:180px;">${row['Content Ideas'] || '-'}</td>
+                            <td>${row['References'] ? `<a href="${row['References']}" target="_blank" style="color:var(--accent)">Ref</a>` : '-'}</td>
+                            <td style="font-size:0.85rem;max-width:150px;">${row['SMS Ideas Direction'] || '-'}</td>
+                            <td>${linkCell(row['Brief CW'], 'Draft CW')}</td>
+                            <td>${row['PJ CW'] || '-'}</td>
+                            <td>${linkCell(row['Design GD'], 'Design')}</td>
+                            <td>${row['PJ GD'] || '-'}</td>
+                            <td>${talentVideo}</td>
+                            <td>${talentPJ}</td>
+                            <td><span class="badge ${getBadgeClass(row['Status Upload SMS'])}">${row['Status Upload SMS'] || '-'}</span></td>
+                            <td>${row['PJ SMS'] || '-'}</td>
+                            <td><span class="badge ${getBadgeClass(row['Overall Status'])}">${row['Overall Status'] || 'Not Started'}</span></td>
                         </tr>
                     `;
                 });
                 tbody.innerHTML = html;
             } else {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size: 2rem; margin-bottom: 1rem; display:block;"></i>Tidak ada data Matrix.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="17" style="text-align:center;padding:2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>Tidak ada data Matrix untuk bulan ini.<br><small style="color:var(--text-muted)">Pastikan nama tab di spreadsheet sudah benar (contoh: "Content JUNI").</small></td></tr>`;
             }
         });
     </script>

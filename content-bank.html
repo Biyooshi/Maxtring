@@ -35,8 +35,8 @@
     <main class="container animate-fade-up">
         <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
             <div>
-                <h1 style="font-size: 2rem;"><i class="fa-solid fa-lightbulb" style="color: var(--accent);"></i> Kolam Ide Konten</h1>
-                <p class="text-muted" style="font-size: 1.1rem;">Daftar ide dari tim SMS. (Hanya diakses oleh SMS & CMO)</p>
+                <h1 style="font-size: 2rem;"><i class="fa-solid fa-lightbulb" style="color: var(--accent);"></i> Content Bank</h1>
+                <p class="text-muted" style="font-size: 1.1rem;">Daftar ide konten dari tim SMS, dikelompokkan per pillar. (Akses: SMS & CMO)</p>
             </div>
             <div>
                 <a href="https://docs.google.com/spreadsheets/d/1qZsdjUwEvHNqh1NM6Iol2VCmFeUeDt-jvv_Hf63DDts/edit" target="_blank" class="btn btn-outline">
@@ -44,6 +44,191 @@
                 </a>
             </div>
         </div>
+        
+        <!-- Pillar Filter Tabs -->
+        <div id="pillar-tabs" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+            <button class="btn pillar-tab active" data-pillar="all" onclick="filterPillar('all')">Semua Pillar</button>
+            <button class="btn pillar-tab" data-pillar="Tips Karir" onclick="filterPillar('Tips Karir')" style="background:rgba(47,102,143,0.1);color:var(--primary);">💼 Tips Karir</button>
+            <button class="btn pillar-tab" data-pillar="Karir Indonesia" onclick="filterPillar('Karir Indonesia')" style="background:rgba(16,185,129,0.1);color:var(--secondary);">🇮🇩 Karir Indonesia</button>
+            <button class="btn pillar-tab" data-pillar="Karir Internasional" onclick="filterPillar('Karir Internasional')" style="background:rgba(139,92,246,0.1);color:var(--purple);">🌍 Karir Internasional</button>
+            <button class="btn pillar-tab" data-pillar="Info Loker" onclick="filterPillar('Info Loker')" style="background:rgba(241,101,39,0.1);color:var(--accent);">📋 Info Loker</button>
+            <button class="btn pillar-tab" data-pillar="Lainnya" onclick="filterPillar('Lainnya')" style="background:rgba(0,0,0,0.05);color:var(--text-muted);">📁 Lainnya</button>
+        </div>
+        
+        <div id="summary-bar" style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;"></div>
+        
+        <div class="card">
+            <div class="table-container">
+                <table id="ideas-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Pillar</th>
+                            <th>Content Type</th>
+                            <th>Ide Konten</th>
+                            <th>SMS Brief Direction</th>
+                            <th>Submitter</th>
+                            <th>Reviewer</th>
+                            <th>Ideas Status</th>
+                            <th>Tanggal Up</th>
+                            <th>Catatan Reviewer</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ideas-body">
+                        <tr>
+                            <td colspan="11" style="text-align: center; padding: 3rem;">
+                                <div class="spinner" style="margin: 0 auto;"></div>
+                                <p class="text-muted">Memuat data Content Bank...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
+    </footer>
+
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allIdeas = [];
+        let activePillar = 'all';
+        
+        const PILLAR_COLORS = {
+            'Tips Karir':        { bg: 'rgba(47,102,143,0.12)',  color: '#2f668f' },
+            'Karir Indonesia':   { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
+            'Karir Internasional': { bg: 'rgba(139,92,246,0.12)', color: '#8B5CF6' },
+            'Info Loker':        { bg: 'rgba(241,101,39,0.12)', color: '#f16527' },
+            'Lainnya':           { bg: 'rgba(0,0,0,0.06)',      color: '#6B7280' }
+        };
+        
+        function getPillarBadge(pillar) {
+            const c = PILLAR_COLORS[pillar] || { bg: 'rgba(0,0,0,0.05)', color: 'var(--text-muted)' };
+            return `<span style="padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:600;background:${c.bg};color:${c.color}">${pillar}</span>`;
+        }
+        
+        function filterPillar(pillar) {
+            activePillar = pillar;
+            document.querySelectorAll('.pillar-tab').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-pillar="${pillar}"]`).classList.add('active');
+            renderTable();
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('ideas-body');
+            const filtered = activePillar === 'all' 
+                ? allIdeas 
+                : allIdeas.filter(r => r['Pillar'] === activePillar);
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>Tidak ada ide untuk pillar ini.</td></tr>`;
+                return;
+            }
+            
+            let html = '';
+            filtered.forEach(row => {
+                // Use correct field names: "Ideas Status" (not "Status Review")
+                const status   = row['Ideas Status'] || 'Belum Diisi';
+                const id       = row['_id'] || (row['No'] + '-' + row['Pillar']);
+                const title    = row['Content Ideas'] || '-';
+                const pillar   = row['Pillar'] || '';
+                const cType    = row['Content Type'] || '';  // REELS or IGF
+                const isReels  = cType.toLowerCase() === 'reels';
+                
+                html += `
+                    <tr data-pillar="${pillar}">
+                        <td style="font-family:monospace;font-size:0.8rem;">${id}</td>
+                        <td>${getPillarBadge(pillar)}</td>
+                        <td>
+                            <span style="padding:0.2rem 0.5rem;border-radius:4px;font-size:0.78rem;font-weight:600;background:${isReels ? 'rgba(139,92,246,0.12)' : 'rgba(47,102,143,0.10)'};color:${isReels ? 'var(--purple)' : 'var(--primary)'}">
+                                ${isReels ? '🎬 Reels' : '🖼️ Feeds'}
+                            </span>
+                        </td>
+                        <td style="font-weight:600;max-width:200px;">${title}</td>
+                        <td style="font-size:0.85rem;max-width:200px;color:var(--text-muted);">${row['SMS Brief Direction'] || '-'}</td>
+                        <td><i class="fa-solid fa-user-circle" style="color:var(--primary);margin-right:4px;"></i>${row['Submitter'] || '-'}</td>
+                        <td>${row['Reviewer'] || '-'}</td>
+                        <td><span class="badge ${getBadgeClass(status)}">${status}</span></td>
+                        <td style="font-size:0.85rem;">${row['Tanggal Konten Up'] || '-'}</td>
+                        <td style="font-size:0.8rem;color:var(--text-muted);max-width:150px;">${row['Reviewer Notes'] || '-'}</td>
+                        <td>
+                            ${status === 'Accepted' ? `
+                                <button class="btn btn-primary btn-sm" onclick="scheduleIdea('${id}', '${title.replace(/'/g, "\\'")}')">
+                                    <i class="fa-solid fa-calendar-plus"></i> Jadwalkan
+                                </button>
+                            ` : (status === 'Scheduled' 
+                                ? '<span style="color:var(--secondary);font-size:0.85rem;"><i class="fa-solid fa-check"></i> Terjadwal</span>' 
+                                : '<span style="color:var(--text-muted);font-size:0.8rem;">-</span>'
+                            )}
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+        
+        function renderSummary() {
+            const pillars = ['Tips Karir','Karir Indonesia','Karir Internasional','Info Loker','Lainnya'];
+            const bar = document.getElementById('summary-bar');
+            let html = '';
+            pillars.forEach(p => {
+                const count = allIdeas.filter(r => r['Pillar'] === p).length;
+                const acc   = allIdeas.filter(r => r['Pillar'] === p && r['Ideas Status'] === 'Accepted').length;
+                const c = PILLAR_COLORS[p] || {};
+                html += `<div style="padding:0.6rem 1rem;border-radius:var(--radius-sm);background:${c.bg||'rgba(0,0,0,0.04)'};border:1px solid ${c.color||'var(--border)'}20">
+                    <div style="font-size:0.8rem;font-weight:600;color:${c.color||'var(--text-muted)'}">${p}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted)">${count} ide | ${acc} Accepted</div>
+                </div>`;
+            });
+            bar.innerHTML = html;
+        }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = checkAuth('SMS'); // Hanya SMS & CMO
+            if (!user) return;
+            
+            const result = await callApi('getContentBankData', { month: 'Juni' });
+            
+            if (result && result.success) {
+                allIdeas = result.data;
+                renderSummary();
+                renderTable();
+            } else {
+                document.getElementById('ideas-body').innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--danger);">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>
+                    Gagal memuat data.<br>
+                    <small style="color:var(--text-muted)">${result?.error || 'Cek koneksi atau nama tab spreadsheet Content Bank.'}</small>
+                </td></tr>`;
+            }
+        });
+        
+        async function scheduleIdea(id, title) {
+            const date = prompt(`Masukkan tanggal tayang untuk:\n"${title}"\n\nFormat: YYYY-MM-DD\nContoh: 2026-06-15`);
+            if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                if (date) alert('Format tanggal salah. Gunakan YYYY-MM-DD.');
+                return;
+            }
+            const res = await callApi('scheduleIdea', {
+                ideaData: { id, title, date, month: 'Juni' }
+            });
+            if (res && res.success) {
+                alert(`✅ Berhasil dijadwalkan!\nTask No: ${res.taskId}`);
+                window.location.reload();
+            } else {
+                alert('Gagal menjadwalkan: ' + (res?.error || 'Error tidak diketahui'));
+            }
+        }
+    </script>
+</body>
+</html>
+
         
         <div class="card">
             <div class="table-container">
