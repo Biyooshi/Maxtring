@@ -17,6 +17,52 @@ function getSheetByName(spreadsheetId, sheetName) {
   return sheet;
 }
 
+// ==========================================
+// HEADER DETECTION UTILITIES
+// ==========================================
+// Finds the first row & column containing "No" within maxScanRows.
+// Used for Matrix (single table) header detection.
+function findHeaderPosition(values, maxScanRows) {
+  var scanLimit = Math.min(values.length, maxScanRows || 20);
+  for (var r = 0; r < scanLimit; r++) {
+    var row = values[r];
+    for (var c = 0; c < row.length; c++) {
+      var cell = String(row[c]).trim();
+      if (cell === 'No') {
+        return { rowIndex: r, colIndex: c };
+      }
+    }
+  }
+  return null;
+}
+
+// Finds ALL columns containing "No" in the same row within maxScanRows.
+// Used for Content Bank (5 pillar blocks side-by-side) — each block starts with "No".
+function findAllHeaderBlockPositions(values, maxScanRows) {
+  var scanLimit = Math.min(values.length, maxScanRows || 20);
+  for (var r = 0; r < scanLimit; r++) {
+    var row = values[r];
+    var positions = [];
+    for (var c = 0; c < row.length; c++) {
+      var cell = String(row[c]).trim();
+      if (cell === 'No') positions.push(c);
+    }
+    if (positions.length >= 2) { // Must have at least 2 blocks to be multi-block row
+      return { rowIndex: r, colPositions: positions };
+    }
+  }
+  // Fallback: accept even a single "No" (Content Bank might have only 1 pillar filled)
+  for (var r2 = 0; r2 < scanLimit; r2++) {
+    var row2 = values[r2];
+    var positions2 = [];
+    for (var c2 = 0; c2 < row2.length; c2++) {
+      if (String(row2[c2]).trim() === 'No') positions2.push(c2);
+    }
+    if (positions2.length >= 1) return { rowIndex: r2, colPositions: positions2 };
+  }
+  return null;
+}
+
 function sendWhatsAppMessage(target, message) {
   var options = {
     'method': 'post',
@@ -220,30 +266,40 @@ function getMatrixData(month) {
     var sheet = getMatrixSheet(MATRIX_ID, month);
     if (!sheet) return { error: "Tab '" + month + "' tidak ditemukan di Matrix. Cek nama tab spreadsheet." };
     
-    var data = sheet.getDataRange().getDisplayValues();
-    if (data.length <= 1) return { success: true, data: [] };
+    var allValues = sheet.getDataRange().getDisplayValues();
+    if (allValues.length === 0) return { success: true, data: [] };
     
-    // The actual Matrix All-Marketing columns (exact names from spreadsheet):
-    // No | Upload Deadline | Day Upload | Time Upload | Content Ideas | References
-    // | SMS Ideas Direction | Jenis Content
-    // | Brief CW | PJ CW
-    // | Design GD | PJ GD
-    // | LINK VIDEO | PJ TALENT
-    // | Status Upload SMS | PJ SMS
-    // + additional tracking cols: Status CW, Status GD, Status Talent, Overall Status
+    // ---- DYNAMIC HEADER DETECTION ----
+    // Spreadsheet Matrix has title/band rows ABOVE the actual header row.
+    // We scan the first 20 rows to find the row containing "No" column.
+    var headerPos = findHeaderPosition(allValues, 20);
+    if (!headerPos) {
+      Logger.log('getMatrixData: Header ("No" column) not found in first 20 rows. Tab: ' + (sheet ? sheet.getName() : 'null'));
+      return { error: "Header row ('No' column) tidak ditemukan dalam 20 baris pertama tab '" + month + "'. Cek struktur sheet." };
+    }
     
-    var headers = data[0];
+    // Slice headers starting from the column where "No" was found
+    var headers = allValues[headerPos.rowIndex].slice(headerPos.colIndex);
+    Logger.log('getMatrixData: Header found at row=' + headerPos.rowIndex + ', col=' + headerPos.colIndex);
+    Logger.log('getMatrixData: Headers = ' + JSON.stringify(headers.slice(0, 10)));
+    
     var result = [];
-    for (var i = 1; i < data.length; i++) {
-      var row = data[i];
-      if (!row[0] && !row[1] && !row[4]) continue; // Skip fully empty rows
+    for (var i = headerPos.rowIndex + 1; i < allValues.length; i++) {
+      var row = allValues[i].slice(headerPos.colIndex);
+      // Skip rows where the "No" column (first col of the slice) is empty
+      if (!row[0] || String(row[0]).trim() === '') continue;
       var obj = rowToObject(row, headers);
-      // Normalize: if column has alias (e.g. "Brief CW" vs "HASIL TULISAN"), expose unified key
+      // Unified alias for pillar/jenis content field
       obj['_jenisContent'] = obj['Jenis Content'] || obj['Jenis Konten'] || '';
       result.push(obj);
     }
+    
+    Logger.log('getMatrixData: Total rows returned = ' + result.length);
+    if (result.length > 0) Logger.log('getMatrixData: First row sample = ' + JSON.stringify(result[0]));
+    
     return { success: true, data: result };
   } catch(e) {
+    Logger.log('getMatrixData ERROR: ' + e.toString());
     return { error: e.toString() };
   }
 }
@@ -279,63 +335,133 @@ var CB_COLS = {
   "Reviewer Notes":    11
 };
 
+// Known pillar order in Content Bank (left-to-right as they appear in the sheet)
+var CONTENT_BANK_PILLAR_NAMES = [
+  'Tips Karir',
+  'Karir Indonesia',
+  'Karir Internasional',
+  'Info Loker',
+  'Lainnya'
+];
+
+// Column header names within each pillar block (left to right, exact order in sheet)
+// These are read dynamically from the header row — this list is a fallback label map.
+var CB_HEADER_LABELS = [
+  'No', 'Submit Date', 'Reference Link', 'Submitter',
+  'Content Ideas', 'Content Type', 'Content Info',
+  'SMS Brief Direction', 'Reviewer', 'Ideas Status',
+  'Tanggal Konten Up', 'Reviewer Notes'
+];
+
 function getContentBankData(month) {
   try {
     var ss = SpreadsheetApp.openById(CONTENT_BANK_ID);
     var sheet = ss.getSheetByName(month);
-    // Fallback: coba variasi nama
+    // Fallback variations
     if (!sheet) sheet = ss.getSheetByName(month.toUpperCase());
     if (!sheet) {
-      var all = ss.getSheets();
-      for (var k = 0; k < all.length; k++) {
-        if (all[k].getName().toLowerCase() === month.toLowerCase()) { sheet = all[k]; break; }
+      var allSheets = ss.getSheets();
+      for (var k = 0; k < allSheets.length; k++) {
+        if (allSheets[k].getName().toLowerCase() === month.toLowerCase()) {
+          sheet = allSheets[k]; break;
+        }
       }
     }
     if (!sheet) return { error: "Tab '" + month + "' tidak ditemukan di Content Bank." };
     
-    var allData = sheet.getDataRange().getValues(); // Use getValues for coordinate-based read
-    var result  = [];
+    var allValues = sheet.getValues();
+    if (allValues.length === 0) return { success: true, data: [] };
     
-    // Read each pillar block
-    var pillars = Object.keys(CONTENT_BANK_PILLAR_MAP);
-    for (var p = 0; p < pillars.length; p++) {
-      var pillarName = pillars[p];
-      var cfg = CONTENT_BANK_PILLAR_MAP[pillarName];
-      var startR = cfg.startRow - 1; // convert to 0-indexed
-      var startC = cfg.startCol - 1;
+    // ---- DYNAMIC MULTI-BLOCK HEADER DETECTION ----
+    // Content Bank has 5 pillar tables side by side.
+    // Each pillar table starts with a "No" column header.
+    // We scan rows to find the row that has the most "No" occurrences.
+    var headerInfo = findAllHeaderBlockPositions(allValues, 20);
+    if (!headerInfo) {
+      Logger.log('getContentBankData: No header blocks found. Tab: ' + sheet.getName());
+      return { error: "Tidak ada header block ('No' column) ditemukan di Content Bank tab '" + month + "'." };
+    }
+    
+    var headerRowIndex = headerInfo.rowIndex;
+    var blockStarts    = headerInfo.colPositions; // e.g. [1, 13, 25, 37, 49]
+    
+    Logger.log('getContentBankData: Header row = ' + headerRowIndex + ', block starts = ' + JSON.stringify(blockStarts));
+    
+    // Determine block end columns (each block ends where next starts, or end of data)
+    var totalCols = allValues[0].length;
+    var blockEndCols = [];
+    for (var b = 0; b < blockStarts.length; b++) {
+      blockEndCols.push(b + 1 < blockStarts.length ? blockStarts[b + 1] : totalCols);
+    }
+    
+    var result = [];
+    
+    for (var p = 0; p < blockStarts.length; p++) {
+      var pillarName = CONTENT_BANK_PILLAR_NAMES[p] || ('Pillar ' + (p + 1));
+      var startC     = blockStarts[p];
+      var endC       = blockEndCols[p];
       
-      // Read rows until we hit 5 consecutive empty "No" cells
+      // Extract headers for this block from the header row
+      var blockHeaders = [];
+      for (var hc = startC; hc < endC; hc++) {
+        var hVal = String(allValues[headerRowIndex][hc]).trim();
+        blockHeaders.push(hVal || CB_HEADER_LABELS[hc - startC] || ('Col' + hc));
+      }
+      
+      Logger.log('getContentBankData: Pillar "' + pillarName + '" headers = ' + JSON.stringify(blockHeaders));
+      
+      // Build header map for this block
+      var blockHeaderMap = {};
+      for (var bh = 0; bh < blockHeaders.length; bh++) {
+        blockHeaderMap[blockHeaders[bh]] = bh; // relative offset from startC
+      }
+      
+      // Helper to get value by header name with fallback to positional index
+      function getField(row, name, fallbackIdx) {
+        var idx = blockHeaderMap[name];
+        if (idx !== undefined && startC + idx < row.length) return row[startC + idx];
+        if (fallbackIdx !== undefined && startC + fallbackIdx < row.length) return row[startC + fallbackIdx];
+        return '';
+      }
+      
       var emptyCount = 0;
-      for (var r = startR + 1; r < allData.length; r++) { // +1 to skip header row of block
-        var noVal = allData[r][startC + CB_COLS["No"]];
+      for (var r = headerRowIndex + 1; r < allValues.length; r++) {
+        var rowData = allValues[r];
+        var noVal = String(getField(rowData, 'No', 0)).trim();
+        
         if (!noVal || noVal === '') {
           emptyCount++;
-          if (emptyCount >= 3) break; // 3 consecutive empties = end of block
+          if (emptyCount >= 5) break; // 5 consecutive empty No = end of block
           continue;
         }
         emptyCount = 0;
-        var ideaId = noVal + '-' + pillarName; // e.g. "1-Tips Karir"
+        
+        var ideaId = noVal + '-' + pillarName;
         result.push({
-          "_id":             ideaId,
-          "Pillar":          pillarName,
-          "No":              noVal,
-          "Submit Date":     allData[r][startC + CB_COLS["Submit Date"]]     || '',
-          "Reference Link":  allData[r][startC + CB_COLS["Reference Link"]]  || '',
-          "Submitter":       allData[r][startC + CB_COLS["Submitter"]]       || '',
-          "Content Ideas":   allData[r][startC + CB_COLS["Content Ideas"]]   || '',
-          "Content Type":    allData[r][startC + CB_COLS["Content Type"]]    || '',
-          "Content Info":    allData[r][startC + CB_COLS["Content Info"]]    || '',
-          "SMS Brief Direction": allData[r][startC + CB_COLS["SMS Brief Direction"]] || '',
-          "Reviewer":        allData[r][startC + CB_COLS["Reviewer"]]        || '',
-          "Ideas Status":    allData[r][startC + CB_COLS["Ideas Status"]]    || '',
-          "Tanggal Konten Up": allData[r][startC + CB_COLS["Tanggal Konten Up"]] || '',
-          "Reviewer Notes":  allData[r][startC + CB_COLS["Reviewer Notes"]]  || ''
+          '_id':               ideaId,
+          'Pillar':            pillarName,
+          'No':                noVal,
+          'Submit Date':       getField(rowData, 'Submit Date',       1)  || '',
+          'Reference Link':    getField(rowData, 'Reference Link',    2)  || '',
+          'Submitter':         getField(rowData, 'Submitter',         3)  || '',
+          'Content Ideas':     getField(rowData, 'Content Ideas',     4)  || '',
+          'Content Type':      getField(rowData, 'Content Type',      5)  || '',
+          'Content Info':      getField(rowData, 'Content Info',      6)  || '',
+          'SMS Brief Direction': getField(rowData, 'SMS Brief Direction', 7) || '',
+          'Reviewer':          getField(rowData, 'Reviewer',          8)  || '',
+          'Ideas Status':      getField(rowData, 'Ideas Status',      9)  || '',
+          'Tanggal Konten Up': getField(rowData, 'Tanggal Konten Up', 10) || '',
+          'Reviewer Notes':    getField(rowData, 'Reviewer Notes',    11) || ''
         });
       }
     }
     
+    Logger.log('getContentBankData: Total ideas returned = ' + result.length);
+    if (result.length > 0) Logger.log('getContentBankData: First idea = ' + JSON.stringify(result[0]));
+    
     return { success: true, data: result };
   } catch(e) {
+    Logger.log('getContentBankData ERROR: ' + e.toString());
     return { error: e.toString() };
   }
 }
