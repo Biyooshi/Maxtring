@@ -120,14 +120,14 @@ function processLogin(username, password) {
   if (password !== 'biyooshi24!!') return { error: "Password salah!" };
   
   var users = {
-    'cmo': { role: 'CMO', type: 'cmo', team: [{nama: "Muhammad Nurul Qolbi"}] },
-    'head-sms': { role: 'SMS', type: 'head', team: [{nama: "Zahwa"}, {nama: "Rifqi"}] },
-    'staff-sms': { role: 'SMS', type: 'staff', team: [{nama: "Salsa"}, {nama: "Rara"}] },
-    'head-cw': { role: 'CW', type: 'head', team: [{nama: "Ben"}, {nama: "Rida"}] },
-    'staff-cw': { role: 'CW', type: 'staff', team: [{nama: "Rida"}, {nama: "Aldo"}] },
-    'head-gd': { role: 'GD', type: 'head', team: [{nama: "Yuna"}, {nama: "Soni"}] },
-    'staff-gd': { role: 'GD', type: 'staff', team: [{nama: "Dito"}, {nama: "Soni"}] },
-    'talent': { role: 'Talent', type: 'staff', team: [{nama: "Reza"}, {nama: "Putri"}] }
+    'sms': { role: 'SMS', type: 'staff', team: [{nama: "Ika"}, {nama: "Naya"}, {nama: "Mei"}, {nama: "Aan"}, {nama: "Kladya"}, {nama: "Shelby"}] },
+    'head-sms': { role: 'SMS', type: 'head', team: [{nama: "Ika"}] }, // Assuming Ika is Head for example, or we can just leave it if there's no specific head
+    'gd': { role: 'GD', type: 'staff', team: [{nama: "Fanisa"}, {nama: "Dita"}, {nama: "Alya"}, {nama: "Syafa"}, {nama: "Lidia"}, {nama: "Azzam"}, {nama: "Fio"}, {nama: "Dhani"}] },
+    'head-gd': { role: 'GD', type: 'head', team: [{nama: "Fanisa"}] },
+    'cw': { role: 'CW', type: 'staff', team: [{nama: "Ben"}, {nama: "Rida"}, {nama: "Sidik"}, {nama: "Via"}, {nama: "Mayang"}, {nama: "Ayu"}] },
+    'head-cw': { role: 'CW', type: 'head', team: [{nama: "Ben"}] },
+    'talent': { role: 'Talent', type: 'staff', team: [{nama: "Reza"}, {nama: "Putri"}] }, // Dummy for now since cc was empty in Morpest data
+    'cmo': { role: 'CMO', type: 'cmo', team: [{nama: "Obi"}] }
   };
   
   if (users[username]) {
@@ -177,7 +177,7 @@ function getContentBankData(month) {
 function scheduleIdea(ideaData) {
   var lock = LockService.getScriptLock();
   try {
-    lock.waitLock(10000); // 10 seconds timeout
+    lock.waitLock(10000); 
     
     var cbSheet = getSheetByName(CONTENT_BANK_ID, ideaData.month);
     var mxSheet = getSheetByName(MATRIX_ID, ideaData.month);
@@ -187,63 +187,92 @@ function scheduleIdea(ideaData) {
     var cbHeaders = cbData[0];
     var cbHeaderMap = getHeaderMap(cbSheet);
     
-    var idCol = cbHeaderMap["ID"];
-    var statusCol = cbHeaderMap["Status"];
+    var cbNoCol = cbHeaderMap["No"];
+    var cbPillarCol = cbHeaderMap["Jenis konten"]; // Pillar
+    var statusCol = cbHeaderMap["Status Review"];
     var rowToUpdate = -1;
     
-    if (idCol === undefined || statusCol === undefined) {
-      return { error: "Kolom ID/Status tidak ditemukan di Content Bank." };
-    }
+    // Find row by parsing ideaData.id which is "No-Pillar" (e.g. "1-TIPS KARIR")
+    var parts = ideaData.id.split("-");
+    var noVal = parts[0];
     
-    for (var i = 1; i < cbData.length; i++) {
-      if (cbData[i][idCol] == ideaData.id) {
-        rowToUpdate = i + 1;
-        break;
+    if (cbNoCol !== undefined && statusCol !== undefined) {
+      for (var i = 1; i < cbData.length; i++) {
+        if (cbData[i][cbNoCol] == noVal) {
+          rowToUpdate = i + 1;
+          break;
+        }
+      }
+      if (rowToUpdate !== -1) {
+        cbSheet.getRange(rowToUpdate, statusCol + 1).setValue("Scheduled");
       }
     }
     
-    if (rowToUpdate === -1) return { error: "ID Content Bank tidak ditemukan" };
-    cbSheet.getRange(rowToUpdate, statusCol + 1).setValue("Scheduled");
-    
     // 2. Prepare data for Matrix
-    var mxHeaders = mxSheet.getDataRange().getValues()[0] || ["Task ID", "Date", "Judul", "CB_Ref_ID", "Overall Status", "CW Status", "GD Status", "Talent Status"];
+    // Target headers based on Morpest Matrix All-Marketing
+    var targetHeaders = ["No", "Upload Deadline", "Day Upload", "Time Upload", "Content Ideas", "References", "SMS Ideas Creation", "Jenis Content", "Brief CW", "PIC CW", "HASIL TULISAN (CHECK DISINI)", "PIC GD", "HASIL DESIGN (CEK DISINI)", "PIC Talent", "LINK VIDEO DISINI", "PIC SMS", "STATUS UPLOAD SMS", "Status CW", "Status GD", "Status Talent", "Overall Status"];
     
-    // If matrix sheet is empty, set headers
-    if (!mxSheet.getDataRange().getValues()[0]) {
-       mxSheet.getRange(1, 1, 1, mxHeaders.length).setValues([mxHeaders]);
+    var mxData = mxSheet.getDataRange().getValues();
+    if (!mxData[0] || mxData[0].length < 2) {
+       mxSheet.getRange(1, 1, 1, targetHeaders.length).setValues([targetHeaders]);
+       mxData = [targetHeaders];
+    }
+    var mxHeaders = mxData[0];
+    
+    // Ensure new Status columns exist
+    var requiredCols = ["Status CW", "Status GD", "Status Talent", "Overall Status"];
+    for(var c=0; c<requiredCols.length; c++) {
+      if(mxHeaders.indexOf(requiredCols[c]) === -1) {
+        mxHeaders.push(requiredCols[c]);
+        mxSheet.getRange(1, mxHeaders.length).setValue(requiredCols[c]);
+      }
     }
     
     var mxHeaderMap = getHeaderMap(mxSheet);
-    var newTaskId = "MAX-" + new Date().getTime().toString().substr(-5);
+    
+    // Calculate new "No" for Matrix
+    var mxNoCol = mxHeaderMap["No"] !== undefined ? mxHeaderMap["No"] : 0;
+    var maxNo = 0;
+    for (var j = 1; j < mxData.length; j++) {
+      var currentNo = parseInt(mxData[j][mxNoCol], 10);
+      if (!isNaN(currentNo) && currentNo > maxNo) {
+        maxNo = currentNo;
+      }
+    }
+    var newNo = maxNo + 1;
     
     var newRowObj = {};
-    newRowObj["Task ID"] = newTaskId;
-    newRowObj["Date"] = ideaData.date; // The H date
-    newRowObj["Judul"] = ideaData.title;
-    newRowObj["CB_Ref_ID"] = ideaData.id;
-    newRowObj["Overall Status"] = "On Process";
-    newRowObj["CW Status"] = "Not Started";
-    newRowObj["GD Status"] = "Not Started";
-    newRowObj["Talent Status"] = "Not Started";
-    newRowObj["SMS Status"] = "Not Started";
+    newRowObj["No"] = newNo;
+    newRowObj["Upload Deadline"] = ideaData.date; // H Date
     
-    // SLA Calculation
+    // Day String
     var d = new Date(ideaData.date);
     if (!isNaN(d.getTime())) {
+      var days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      newRowObj["Day Upload"] = days[d.getDay()];
+      
+      // SLA Calculation / Deadlines
       var cwDate = new Date(d); cwDate.setDate(cwDate.getDate() - 3);
       var gdDate = new Date(d); gdDate.setDate(gdDate.getDate() - 2);
-      var tlDate = new Date(d); tlDate.setDate(tlDate.getDate() - 2);
       
-      newRowObj["Deadline CW"] = Utilities.formatDate(cwDate, "GMT+7", "yyyy-MM-dd");
-      newRowObj["Deadline GD"] = Utilities.formatDate(gdDate, "GMT+7", "yyyy-MM-dd");
-      newRowObj["Deadline Talent"] = Utilities.formatDate(tlDate, "GMT+7", "yyyy-MM-dd");
+      // We can insert deadline notes in Brief CW or other places if needed, but per original Matrix, they just use Upload Deadline.
+      // So we will just trust the dates for now or append it to references.
     }
+    
+    newRowObj["Content Ideas"] = ideaData.title;
+    newRowObj["Jenis Content"] = parts[1] || ""; // The pillar
+    
+    newRowObj["Overall Status"] = "On Process";
+    newRowObj["Status CW"] = "Not Started";
+    newRowObj["Status GD"] = "Not Started";
+    newRowObj["Status Talent"] = "Not Started";
+    newRowObj["STATUS UPLOAD SMS"] = "Not Started";
     
     var mxRowData = objectToRow(newRowObj, mxHeaders, mxHeaders.length);
     mxSheet.appendRow(mxRowData);
     
     SpreadsheetApp.flush();
-    return { success: true, taskId: newTaskId };
+    return { success: true, taskId: newNo };
     
   } catch (e) {
     return { error: e.toString() };
@@ -257,23 +286,24 @@ function updateTaskStatus(taskId, division, newStatus, user, notes) {
   try {
     lock.waitLock(10000);
     
-    // Assume all updates happen in 'Juni' for now as per constraints
     var mxSheet = getSheetByName(MATRIX_ID, "Juni");
     var data = mxSheet.getDataRange().getValues();
     var headers = data[0];
     var headerMap = getHeaderMap(mxSheet);
     
-    var idCol = headerMap["Task ID"];
-    var targetCol = headerMap[division + " Status"];
-    var overallCol = headerMap["Overall Status"];
-    var notesCol = headerMap["Notes"]; // If exists
+    var idCol = headerMap["No"];
     
-    if (idCol === undefined) return { error: "Header Task ID tidak ditemukan." };
+    var targetStatusColName = (division === 'SMS') ? "STATUS UPLOAD SMS" : "Status " + division;
+    var targetCol = headerMap[targetStatusColName];
+    var overallCol = headerMap["Overall Status"];
+    
+    if (idCol === undefined) return { error: "Header 'No' tidak ditemukan di Matrix." };
+    
+    // Add columns dynamically if missing
     if (targetCol === undefined) {
-      // Add column if it doesn't exist dynamically
       targetCol = headers.length;
-      mxSheet.getRange(1, targetCol + 1).setValue(division + " Status");
-      headers.push(division + " Status");
+      mxSheet.getRange(1, targetCol + 1).setValue(targetStatusColName);
+      headers.push(targetStatusColName);
     }
     
     var rowToUpdate = -1;
@@ -286,39 +316,49 @@ function updateTaskStatus(taskId, division, newStatus, user, notes) {
     
     if (rowToUpdate === -1) return { error: "Task tidak ditemukan" };
     
-    // Update Status
+    // Update Status Division
     mxSheet.getRange(rowToUpdate, targetCol + 1).setValue(newStatus);
     
-    // Auto-update Overall Status if Approved
-    if (newStatus === "Approved" && overallCol !== undefined) {
-      // Logic checks could go here to verify ALL are approved before setting Overall to Approved.
-      // For now, let's keep it simple or manual.
-    }
-    
-    // Record Notes if provided
-    if (notes && notes.length > 0) {
-      if (notesCol === undefined) {
-        notesCol = headers.length;
-        mxSheet.getRange(1, notesCol + 1).setValue("Notes");
-        headers.push("Notes");
+    // Auto-update Overall Status if everything is moving
+    if (overallCol !== undefined) {
+      if (newStatus === "Approved") {
+        mxSheet.getRange(rowToUpdate, overallCol + 1).setValue("Approved by " + division);
+      } else if (division === 'SMS' && newStatus === 'Posted') {
+        mxSheet.getRange(rowToUpdate, overallCol + 1).setValue("Posted");
+      } else {
+        mxSheet.getRange(rowToUpdate, overallCol + 1).setValue("On Process");
       }
-      var existingNotes = mxSheet.getRange(rowToUpdate, notesCol + 1).getValue() || "";
-      var newNote = "[" + Utilities.formatDate(new Date(), "GMT+7", "MM/dd HH:mm") + "] " + user + " (" + division + "): " + newStatus + " - " + notes;
-      mxSheet.getRange(rowToUpdate, notesCol + 1).setValue(existingNotes + "\n" + newNote);
     }
     
-    // Write to Audit Log (Hidden/Optional)
-    var logSheet = getSheetByName(MATRIX_ID, "Audit Log");
-    if (logSheet) {
-      logSheet.appendRow([new Date(), user, taskId, division, newStatus, notes || ""]);
+    // Handle Asset Links (Ctrl+K format)
+    if (notes && (notes.startsWith("http://") || notes.startsWith("https://"))) {
+      var assetCol = -1;
+      if (division === 'CW') assetCol = headerMap["HASIL TULISAN (CHECK DISINI)"];
+      if (division === 'GD') assetCol = headerMap["HASIL DESIGN (CEK DISINI)"];
+      if (division === 'Talent') assetCol = headerMap["LINK VIDEO DISINI"];
+      
+      if (assetCol !== undefined && assetCol !== -1) {
+        // Set Rich Text Link (Ctrl+K style)
+        var richValue = SpreadsheetApp.newRichTextValue()
+          .setText("Link " + division)
+          .setLinkUrl(notes)
+          .build();
+        mxSheet.getRange(rowToUpdate, assetCol + 1).setRichTextValue(richValue);
+      }
+    }
+    
+    // Log PIC Name (e.g. who worked on it)
+    var picCol = headerMap["PIC " + division];
+    if (picCol !== undefined) {
+      mxSheet.getRange(rowToUpdate, picCol + 1).setValue(user);
     }
     
     SpreadsheetApp.flush();
     
-    // Notifications
+    // Notifications (Dummy)
     if (newStatus === "Approved" || newStatus === "Revisi") {
-      var msg = "🚨 *Maxtring Update*\n\nTask: " + taskId + "\nDivisi: " + division + "\nStatus: *" + newStatus + "*\nOleh: " + user + (notes ? "\nCatatan: " + notes : "");
-      sendWhatsAppMessage("6285233142178", msg); // Send to CMO (Dummy number)
+      var msg = "🚨 *Maxtring Update*\n\nTask No: " + taskId + "\nDivisi: " + division + "\nStatus: *" + newStatus + "*\nOleh: " + user;
+      sendWhatsAppMessage("6285233142178", msg); 
     }
     
     return { success: true };

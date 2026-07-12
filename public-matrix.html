@@ -50,15 +50,17 @@
                 <table id="matrix-table" style="font-size: 0.9rem;">
                     <thead>
                         <tr>
-                            <th>Task ID</th>
-                            <th>Tanggal Tayang</th>
-                            <th>Judul Konten</th>
-                            <th>SMS Status</th>
-                            <th>CW Status</th>
-                            <th>GD Status</th>
-                            <th>Talent Status</th>
+                            <th>No</th>
+                            <th>Upload Deadline</th>
+                            <th>Day / Time</th>
+                            <th>Content Ideas</th>
+                            <th>References</th>
+                            <th>Brief CW</th>
+                            <th>PIC CW</th>
+                            <th>Hasil Tulisan</th>
+                            <th>Hasil Design</th>
+                            <th>Status Upload SMS</th>
                             <th>Overall Status</th>
-                            <th>Catatan Terakhir</th>
                         </tr>
                     </thead>
                     <tbody id="matrix-body">
@@ -104,17 +106,17 @@
                     
                     html += `
                         <tr>
-                            <td style="font-family: monospace; font-weight: 600;">${row["Task ID"] || '-'}</td>
-                            <td>${row["Date"] || '-'}</td>
-                            <td style="font-weight: 600;">${row["Judul"] || '-'}</td>
-                            <td><span class="badge ${getBadgeClass(row["SMS Status"])}">${row["SMS Status"] || 'Not Started'}</span></td>
-                            <td><span class="badge ${getBadgeClass(row["CW Status"])}">${row["CW Status"] || 'Not Started'}</span></td>
-                            <td><span class="badge ${getBadgeClass(row["GD Status"])}">${row["GD Status"] || 'Not Started'}</span></td>
-                            <td><span class="badge ${getBadgeClass(row["Talent Status"])}">${row["Talent Status"] || 'Not Started'}</span></td>
+                            <td style="font-family: monospace; font-weight: 600;">${row["No"] || '-'}</td>
+                            <td>${row["Upload Deadline"] || '-'}</td>
+                            <td>${row["Day Upload"] || '-'} <br> ${row["Time Upload"] || ''}</td>
+                            <td style="font-weight: 600; max-width: 200px;">${row["Content Ideas"] || '-'}</td>
+                            <td>${row["References"] ? `<a href="${row["References"]}" target="_blank">Link</a>` : '-'}</td>
+                            <td>${row["Brief CW"] || '-'}</td>
+                            <td>${row["PIC CW"] || '-'}</td>
+                            <td>${row["HASIL TULISAN (CHECK DISINI)"] ? `<a href="${row["HASIL TULISAN (CHECK DISINI)"]}" target="_blank">Link Drive</a>` : '-'}</td>
+                            <td>${row["HASIL DESIGN (CEK DISINI)"] ? `<a href="${row["HASIL DESIGN (CEK DISINI)"]}" target="_blank">Link Drive</a>` : '-'}</td>
+                            <td><span class="badge ${getBadgeClass(row["STATUS UPLOAD SMS"])}">${row["STATUS UPLOAD SMS"] || '-'}</span></td>
                             <td><span class="badge ${getBadgeClass(row["Overall Status"])}">${row["Overall Status"] || 'Not Started'}</span></td>
-                            <td style="color: var(--text-muted); font-size: 0.8rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${notes}">
-                                ${lastNote}
-                            </td>
                         </tr>
                     `;
                 });

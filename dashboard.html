@@ -124,8 +124,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label" for="modal-notes">Catatan / Alasan (Opsional)</label>
-                    <textarea id="modal-notes" class="form-textarea" rows="3" placeholder="Tambahkan link gdrive atau alasan revisi di sini..."></textarea>
+                    <label class="form-label" for="modal-notes">Link Hasil Kerja (Google Drive) / Catatan Revisi</label>
+                    <textarea id="modal-notes" class="form-textarea" rows="3" placeholder="https://drive.google.com/..."></textarea>
                 </div>
                 
                 <div class="flex justify-between" style="margin-top: 2rem;">
@@ -192,24 +192,24 @@
                     if (myStatus === "Revisi") revCount++;
                     
                     // Calculate SLA based on Role
-                    let deadlineCol = `Deadline ${user.role}`;
-                    let slaInfo = calculateSLA(row[deadlineCol]);
-                    if (slaInfo.text.includes("Overdue") && myStatus !== 'Approved') overdueCount++;
+                    // Originally we used Deadline CW/GD, but now we use Upload Deadline as base for all.
+                    let slaInfo = calculateSLA(row["Upload Deadline"]);
+                    if (slaInfo.text.includes("Overdue") && myStatus !== 'Approved' && myStatus !== 'Posted') overdueCount++;
                     
                     // Render Row
                     html += `
                         <tr>
-                            <td style="font-family: monospace; font-weight: 600;">${row["Task ID"] || '-'}</td>
-                            <td style="font-weight: 600;">${row["Judul"] || '-'}</td>
+                            <td style="font-family: monospace; font-weight: 600;">${row["No"] || '-'}</td>
+                            <td style="font-weight: 600;">${row["Content Ideas"] || '-'}</td>
                             <td>
                                 <div style="font-size: 0.85rem; font-weight: 600; color: ${slaInfo.color}; margin-bottom: 0.25rem;">${slaInfo.text}</div>
                                 <div class="progress-container"><div class="progress-bar" style="width: ${slaInfo.progress}%; background-color: ${slaInfo.color};"></div></div>
-                                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">${row[deadlineCol] || 'Tidak diset'}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">${row["Upload Deadline"] || 'Tidak diset'}</div>
                             </td>
                             <td><span class="badge ${getBadgeClass(row["Overall Status"])}">${row["Overall Status"] || 'Not Started'}</span></td>
                             <td><span class="badge ${getBadgeClass(myStatus)}">${myStatus}</span></td>
                             <td>
-                                <button class="btn btn-outline btn-sm" onclick="openUpdateModal('${row["Task ID"]}', '${row["Judul"]}', '${myStatus}')">
+                                <button class="btn btn-outline btn-sm" onclick="openUpdateModal('${row["No"]}', '${(row["Content Ideas"]||'').replace(/'/g, "\\'")}', '${myStatus}')">
                                     <i class="fa-solid fa-pen"></i> Update
                                 </button>
                             </td>

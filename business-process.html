@@ -36,59 +36,62 @@
             <p class="text-muted" style="font-size: 1.1rem;">Standar operasional prosedur pengisian Matrix All Marketing.</p>
         </div>
         
-        <div class="grid" style="gap: 2rem;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 2rem; margin-top: 3rem;">
+            <!-- Row 1: SMS -->
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap;">
+                <div class="fc-start-end">Start</div>
+                <div class="fc-arrow-right"></div>
+                <div class="fc-node" style="background: var(--accent); color: white; border: none;">SMS Mencari<br>Ide Konten</div>
+                <div class="fc-arrow-right"></div>
+                <div class="fc-diamond"><span>Review<br>Head SMS</span></div>
+                <div class="fc-arrow-right"></div>
+                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Ide masuk ke<br>Matrix</div>
+                <div class="fc-arrow-right"></div>
+                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Konfirmasi<br>Grup & Head CW</div>
+            </div>
             
-            <!-- Step 1 -->
-            <div class="card card-glow" style="border-left: 4px solid var(--accent);">
-                <h2 style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">1</div>
-                    Tahap Ideation (Content Bank)
-                </h2>
-                <div style="margin-left: 3.5rem; margin-top: 1rem; color: var(--text-muted); line-height: 1.8;">
-                    <p><strong>PIC: Divisi SMS (Social Media Specialist)</strong></p>
-                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                        <li>Tim SMS mencari referensi dan memasukkan ide konten ke dalam <strong>Google Sheet Content Bank</strong>.</li>
-                        <li>Head / Co-Head SMS akan mereview ide tersebut. Jika disetujui, statusnya diubah menjadi <span class="badge badge-app">Accepted</span>.</li>
-                    </ul>
-                </div>
+            <div class="fc-arrow-down"></div>
+            
+            <!-- Row 2: CW -->
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap; flex-direction: row-reverse;">
+                <div class="fc-node" style="background: #f59e0b; color: white; border: none;">Head CW bagi<br>pekerjaan</div>
+                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
+                <div class="fc-node" style="background: #f59e0b; color: white; border: none;">CW buat<br>konten & Submit</div>
+                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
+                <div class="fc-diamond" style="background: #2563eb;"><span>Review<br>Head CW</span></div>
+                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
+                <div class="fc-node" style="background: #f59e0b; color: white; border: none;">ACC:<br>Konfirmasi Grup</div>
             </div>
-
-            <!-- Step 2 -->
-            <div class="card card-glow" style="border-left: 4px solid var(--primary);">
-                <h2 style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">2</div>
-                    Penjadwalan (Matrix)
-                </h2>
-                <div style="margin-left: 3.5rem; margin-top: 1rem; color: var(--text-muted); line-height: 1.8;">
-                    <p><strong>PIC: Head / Co-Head SMS</strong></p>
-                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                        <li>Buka menu <strong>Calendar</strong> di aplikasi Maxtring.</li>
-                        <li><em>Drag</em> (Tarik) ide yang berstatus Accepted dari sidebar ke tanggal tayang (H) di dalam kalender.</li>
-                        <li>Sistem akan otomatis menghitung sub-deadline: <strong>CW (H-3)</strong>, <strong>GD/Talent (H-2)</strong>, dan membuat Task ID baru di Matrix.</li>
-                    </ul>
-                </div>
+            
+            <div class="fc-arrow-down"></div>
+            
+            <!-- Row 3: GD -->
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap;">
+                <div class="fc-node" style="background: #10b981; color: white; border: none;">GD Terima Brief<br>& Buat Design</div>
+                <div class="fc-arrow-right"></div>
+                <div class="fc-node" style="background: #10b981; color: white; border: none;">Kirim Konten<br>& Konfirmasi</div>
+                <div class="fc-arrow-right"></div>
+                <div class="fc-diamond" style="background: #059669;"><span>Review<br>Head GD</span></div>
+                <div class="fc-arrow-right"></div>
+                <div class="fc-node" style="background: #10b981; color: white; border: none;">ACC:<br>Konfirmasi Grup</div>
             </div>
-
-            <!-- Step 3 -->
-            <div class="card card-glow" style="border-left: 4px solid var(--status-app);">
-                <h2 style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--status-app); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">3</div>
-                    Eksekusi & Update Status (SLA)
-                </h2>
-                <div style="margin-left: 3.5rem; margin-top: 1rem; color: var(--text-muted); line-height: 1.8;">
-                    <p>Setiap staf wajib mengupdate status pekerjaan mereka melalui Dashboard masing-masing. Jangan mengedit Spreadsheet secara manual untuk mencegah tumpang tindih data.</p>
-                    
-                    <div style="margin-top: 1rem; padding: 1.5rem; background: rgba(0,0,0,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border);">
-                        <h4 style="margin-bottom: 1rem; color: var(--text-main);">Alur Ketergantungan (Dependency):</h4>
-                        <ol style="margin-left: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                            <li><strong>CW (Copywriter):</strong> Membuat *brief* (Teks/Skrip). Deadline H-3. <br>→ <span class="badge badge-prog">Submitted</span> → Menunggu Head CW <span class="badge badge-app">Approved</span></li>
-                            <li><strong>GD (Graphic Designer) / Talent:</strong> Mengeksekusi aset visual berdasarkan *brief* CW. Deadline H-2. <br>→ <span class="badge badge-prog">Submitted</span> → Menunggu Head GD/CMO <span class="badge badge-app">Approved</span></li>
-                            <li><strong>SMS:</strong> Final *Quality Control* dan *Upload* konten di hari H. <br>→ <span class="badge badge-post">Posted</span></li>
-                        </ol>
-                    </div>
-                </div>
+            
+            <div class="fc-arrow-down"></div>
+            
+            <!-- Row 4: SMS End -->
+            <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap; flex-direction: row-reverse;">
+                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Terima Aset<br>Visual & Teks</div>
+                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
+                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Posting ke<br>Sosmed JOY</div>
+                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
+                <div class="fc-node" style="background: var(--accent); color: white; border: none;">Update Status<br>"Posted"</div>
+                <div class="fc-arrow-right" style="transform: rotate(180deg);"></div>
+                <div class="fc-start-end">End</div>
             </div>
-
+            
+            <div style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem; text-align: center;">
+                *Catatan: Jika ada penolakan (Rejected) pada fase review, task akan dikembalikan ke anggota divisi terkait untuk direvisi.
+            </div>
         </div>
     </main>
 

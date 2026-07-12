@@ -123,18 +123,14 @@
                     const result = await callApi('getMatrixData', { month: 'Juni' }); // Simplified to Juni
                     if (result && result.success) {
                         const events = result.data.map(row => {
-                            let color = '#4F46E5'; // default
+                            let color = '#2f668f'; // default primary
                             if (row["Overall Status"] === 'Posted') color = '#8B5CF6';
                             if (row["Overall Status"] === 'Approved') color = '#10B981';
                             
-                            // Try to parse Date
-                            let dateStr = row["Date"];
-                            // Simple parsing if format is YYYY-MM-DD
-                            // Assuming backend saves it cleanly or we clean it here
-                            // For safety, we expect standard format
+                            let dateStr = row["Upload Deadline"];
                             
                             return {
-                                title: `${row["Judul"]} (${row["Overall Status"]})`,
+                                title: `${row["Content Ideas"]} (${row["Overall Status"]})`,
                                 start: dateStr,
                                 allDay: true,
                                 backgroundColor: color
@@ -188,16 +184,17 @@
             if (result && result.success) {
                 let html = '';
                 // Filter only 'Accepted' status to be dragged
-                const acceptedIdeas = result.data.filter(row => row["Status"] === 'Accepted');
+                const acceptedIdeas = result.data.filter(row => row["Status Review"] === 'Accepted');
                 
                 if (acceptedIdeas.length === 0) {
                     html = '<div style="text-align:center; padding: 1rem; color: var(--text-muted);">Tidak ada ide Accepted.</div>';
                 } else {
                     acceptedIdeas.forEach(idea => {
+                        const customId = (idea["No"] || '') + '-' + (idea["Jenis konten"] || '');
                         html += `
-                            <div class="fc-event-draggable" data-id="${idea["ID"]}" data-title="${idea["Judul"]}">
-                                <div><i class="fa-solid fa-grip-vertical text-muted" style="margin-right: 0.5rem;"></i>${idea["Judul"]}</div>
-                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Pillar: ${idea["Pillar"]}</div>
+                            <div class="fc-event-draggable" data-id="${customId}" data-title="${(idea["Content Ideas"]||'').replace(/"/g, "&quot;")}">
+                                <div><i class="fa-solid fa-grip-vertical text-muted" style="margin-right: 0.5rem;"></i>${idea["Content Ideas"]}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Pillar: ${idea["Jenis konten"]}</div>
                             </div>
                         `;
                     });

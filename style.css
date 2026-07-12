@@ -15,25 +15,33 @@
   
   /* Neutral / Backgrounds */
   --bg-color: hsl(220, 20%, 97%);
-  --surface: hsl(0, 0%, 100%);
-  --text-main: hsl(220, 30%, 15%);
-  --text-muted: hsl(220, 15%, 45%);
-  --border: hsl(220, 20%, 90%);
+  /* Joy Morpest Color Palette */
+  --primary: #2f668f;
+  --primary-hover: #255273;
+  --secondary: #10B981;
+  --accent: #f16527;
+  --accent-hover: #df6631;
+  --danger: #EF4444;
+  --bg-color: #f0f9ff;
+  --surface: #FFFFFF;
+  --text-main: #111827;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
   
   /* Status Colors */
-  --status-ns: hsl(220, 10%, 60%); /* Not Started - Gray */
-  --status-prog: hsl(35, 90%, 55%); /* In Progress / Scheduled - Amber */
-  --status-sub: hsl(210, 80%, 55%); /* Submitted / Accepted - Blue */
-  --status-app: hsl(150, 60%, 45%); /* Approved - Green */
-  --status-rev: hsl(350, 80%, 55%); /* Revisi - Red */
-  --status-post: hsl(270, 70%, 55%); /* Posted - Purple */
+  --status-ns: #9CA3AF;
+  --status-prog: #f16527;
+  --status-rev: #EF4444;
+  --status-app: #10B981;
+  --status-post: #8B5CF6;
   
-  /* Effects */
-  --radius: 16px;
+  /* Utilities */
   --radius-sm: 8px;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-glow: 0 0 20px hsla(var(--hue-primary), 80%, 60%, 0.3);
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 4px 6px -1px rgba(47, 102, 143, 0.1);
+  --shadow-md: 0 10px 15px -3px rgba(47, 102, 143, 0.15);
+  --shadow-glow: 0 0 20px rgba(241, 101, 39, 0.15);
   
   --glass-bg: hsla(0, 0%, 100%, 0.7);
   --glass-border: hsla(0, 0%, 100%, 0.5);
@@ -247,6 +255,78 @@ a:hover {
   display: flex;
   align-items: center;
   position: relative;
+}
+
+/* SOP Flowchart Styles */
+.fc-node {
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 2px solid var(--primary);
+    text-align: center;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+    font-weight: 500;
+}
+
+.fc-diamond {
+    width: 120px;
+    height: 120px;
+    background: var(--primary);
+    color: white;
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+.fc-diamond > span {
+    transform: rotate(-45deg);
+    font-weight: bold;
+    text-align: center;
+}
+
+.fc-start-end {
+    background: #ffb6c1; /* Pinkish per user screenshot */
+    border: 2px solid #ff69b4;
+    border-radius: 50px;
+    padding: 0.8rem 2rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.fc-arrow-down {
+    width: 2px;
+    height: 40px;
+    background: var(--text-muted);
+    margin: 0 auto;
+    position: relative;
+}
+.fc-arrow-down::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: -4px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--text-muted) transparent transparent transparent;
+}
+.fc-arrow-right {
+    height: 2px;
+    width: 40px;
+    background: var(--text-muted);
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+}
+.fc-arrow-right::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: -4px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--text-muted);
 }
 
 .nav-item i {

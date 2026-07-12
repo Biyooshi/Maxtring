@@ -50,10 +50,11 @@
                 <table id="ideas-table">
                     <thead>
                         <tr>
-                            <th>ID Ide</th>
-                            <th>Pillar</th>
-                            <th>Judul Konten</th>
-                            <th>Pengusul</th>
+                            <th>ID (No-Pillar)</th>
+                            <th>Pillar / Jenis Konten</th>
+                            <th>Ide Konten</th>
+                            <th>Brief Detail</th>
+                            <th>PIC SMS</th>
                             <th>Status Review</th>
                             <th>Aksi Jadwal</th>
                         </tr>
@@ -91,18 +92,22 @@
             if (result && result.success && result.data.length > 0) {
                 let html = '';
                 result.data.forEach(row => {
-                    const status = row["Status"] || 'Unreviewed';
+                    const status = row["Status Review"] || 'Unreviewed';
+                    const noVal = row["No"] || '';
+                    const pillarVal = row["Jenis konten"] || '';
+                    const customId = noVal + '-' + pillarVal;
                     
                     html += `
                         <tr>
-                            <td style="font-family: monospace; font-weight: 600;">${row["ID"] || '-'}</td>
-                            <td><span style="padding: 0.2rem 0.5rem; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 0.85rem;">${row["Pillar"] || '-'}</span></td>
-                            <td style="font-weight: 600;">${row["Judul"] || '-'}</td>
-                            <td><i class="fa-solid fa-user-circle text-muted"></i> ${row["Pengusul"] || '-'}</td>
+                            <td style="font-family: monospace; font-weight: 600;">${customId}</td>
+                            <td><span style="padding: 0.2rem 0.5rem; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 0.85rem;">${pillarVal || '-'}</span></td>
+                            <td style="font-weight: 600;">${row["Content Ideas"] || '-'}</td>
+                            <td style="font-size: 0.85rem; max-width: 250px;">${row["Brief Detail / Copywriting"] || '-'}</td>
+                            <td><i class="fa-solid fa-user-circle text-muted"></i> ${row["PIC SMS"] || '-'}</td>
                             <td><span class="badge ${getBadgeClass(status)}">${status}</span></td>
                             <td>
                                 ${status === 'Accepted' ? `
-                                    <button class="btn btn-primary btn-sm" onclick="scheduleIdea('${row["ID"]}', '${row["Judul"].replace(/'/g, "\\'")}')">
+                                    <button class="btn btn-primary btn-sm" onclick="scheduleIdea('${customId}', '${(row["Content Ideas"]||'').replace(/'/g, "\\'")}')">
                                         <i class="fa-solid fa-calendar-plus"></i> Jadwalkan Manual
                                     </button>
                                 ` : (status === 'Scheduled' ? '<span class="text-muted"><i class="fa-solid fa-check"></i> Sudah Dijadwalkan</span>' : '-')}
