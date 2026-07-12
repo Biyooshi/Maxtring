@@ -7,7 +7,7 @@ const SECRET_TOKEN = "maxtring2026";
 // Matrix tab name & Content Bank tab name differ!
 // ============================================
 const MATRIX_MONTH_TAB       = "Content JUNI";  // Exact tab name in Matrix All-Marketing
-const CONTENT_BANK_MONTH_TAB = "Juni";          // Exact tab name in SMS Content Bank
+const CONTENT_BANK_MONTH_PREFIX = "JULI";  // Prefix bulan aktif — backend otomatis gabungkan JULI, JULI (2), JULI (3), dst
 // ============================================
 // DATE PARSING (format Indonesia: DD/MM/YYYY atau DD/MM/YY)
 // ============================================

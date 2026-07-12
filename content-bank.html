@@ -38,21 +38,29 @@
                 <h1 style="font-size: 2rem;"><i class="fa-solid fa-lightbulb" style="color: var(--accent);"></i> Content Bank</h1>
                 <p class="text-muted" style="font-size: 1.1rem;">Daftar ide konten dari tim SMS, dikelompokkan per pillar. (Akses: SMS & CMO)</p>
             </div>
-            <div>
+            <div style="display:flex;gap:0.5rem;">
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-submit-idea')">
+                    <i class="fa-solid fa-plus"></i> Tambah Ide
+                </button>
                 <a href="https://docs.google.com/spreadsheets/d/1qZsdjUwEvHNqh1NM6Iol2VCmFeUeDt-jvv_Hf63DDts/edit" target="_blank" class="btn btn-outline">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Spreadsheet Asli
                 </a>
             </div>
         </div>
         
-        <!-- Pillar Filter Tabs -->
-        <div id="pillar-tabs" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
-            <button class="btn pillar-tab active" data-pillar="all" onclick="filterPillar('all')">Semua Pillar</button>
-            <button class="btn pillar-tab" data-pillar="Tips Karir" onclick="filterPillar('Tips Karir')" style="background:rgba(47,102,143,0.1);color:var(--primary);">💼 Tips Karir</button>
-            <button class="btn pillar-tab" data-pillar="Karir Indonesia" onclick="filterPillar('Karir Indonesia')" style="background:rgba(16,185,129,0.1);color:var(--secondary);">🇮🇩 Karir Indonesia</button>
-            <button class="btn pillar-tab" data-pillar="Karir Internasional" onclick="filterPillar('Karir Internasional')" style="background:rgba(139,92,246,0.1);color:var(--purple);">🌍 Karir Internasional</button>
-            <button class="btn pillar-tab" data-pillar="Info Loker" onclick="filterPillar('Info Loker')" style="background:rgba(241,101,39,0.1);color:var(--accent);">📋 Info Loker</button>
-            <button class="btn pillar-tab" data-pillar="Lainnya" onclick="filterPillar('Lainnya')" style="background:rgba(0,0,0,0.05);color:var(--text-muted);">📁 Lainnya</button>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem;">
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;" id="pillar-checkboxes">
+                <label class="pillar-checkbox-label"><input type="checkbox" value="TIPS KARIR" checked onchange="applyContentBankFilters()"> 💼 Tips Karir</label>
+                <label class="pillar-checkbox-label"><input type="checkbox" value="KARIR INDONESIA" checked onchange="applyContentBankFilters()"> 🇮🇩 Karir Indonesia</label>
+                <label class="pillar-checkbox-label"><input type="checkbox" value="KARIR INTERNASIONAL" checked onchange="applyContentBankFilters()"> 🌍 Karir Internasional</label>
+                <label class="pillar-checkbox-label"><input type="checkbox" value="INFO LOKER" checked onchange="applyContentBankFilters()"> 📋 Info Loker</label>
+            </div>
+            
+            <div style="position:relative;flex:1;min-width:220px;max-width:320px;">
+                <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+                <input type="text" id="search-content-bank" class="form-input" style="padding-left:2.5rem;" 
+                       placeholder="Cari di semua kolom..." oninput="applyContentBankFilters()">
+            </div>
         </div>
         
         <div id="summary-bar" style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;"></div>
@@ -96,17 +104,78 @@
         <div class="spinner"></div>
     </div>
 
+    <!-- Modal Form Tambah Ide -->
+    <div class="modal-overlay" id="modal-submit-idea">
+        <div class="modal-content">
+            <h3 style="margin-bottom:1.5rem;"><i class="fa-solid fa-lightbulb"></i> Submit Ide Konten Baru</h3>
+            <form id="form-submit-idea">
+                <div class="form-group">
+                    <label class="form-label">Content Pillar</label>
+                    <select id="input-pillar" class="form-select" required>
+                        <option value="">-- Pilih Pillar --</option>
+                        <option value="TIPS KARIR">Tips Karir</option>
+                        <option value="KARIR INDONESIA">Karir Indonesia</option>
+                        <option value="KARIR INTERNASIONAL">Karir Internasional</option>
+                        <option value="INFO LOKER">Info Loker</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Content Ideas (Judul Ide)</label>
+                    <input type="text" id="input-content-ideas" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Reference Link</label>
+                    <input type="url" id="input-reference-link" class="form-input" placeholder="https://...">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Content Type</label>
+                    <select id="input-content-type" class="form-select" required>
+                        <option value="">-- Pilih --</option>
+                        <option value="IGF">IGF</option>
+                        <option value="REELS">REELS</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Content Info</label>
+                    <select id="input-content-info" class="form-select" required>
+                        <option value="">-- Pilih --</option>
+                        <option value="Education">Education</option>
+                        <option value="Promoting">Promoting</option>
+                        <option value="For Fun">For Fun</option>
+                        <option value="Awareness">Awareness</option>
+                        <option value="Testimonial">Testimonial</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">SMS Brief Direction</label>
+                    <textarea id="input-brief-direction" class="form-textarea" rows="4" placeholder="Arahan konten untuk tim CW..."></textarea>
+                </div>
+                
+                <div class="flex gap-2" style="margin-top:1.5rem;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Ide
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-submit-idea')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
     <script>
         let allIdeas = [];
         let activePillar = 'all';
         
         const PILLAR_COLORS = {
-            'Tips Karir':        { bg: 'rgba(47,102,143,0.12)',  color: '#2f668f' },
-            'Karir Indonesia':   { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
-            'Karir Internasional': { bg: 'rgba(139,92,246,0.12)', color: '#8B5CF6' },
-            'Info Loker':        { bg: 'rgba(241,101,39,0.12)', color: '#f16527' },
-            'Lainnya':           { bg: 'rgba(0,0,0,0.06)',      color: '#6B7280' }
+            'TIPS KARIR':        { bg: 'rgba(47,102,143,0.12)',  color: '#2f668f' },
+            'KARIR INDONESIA':   { bg: 'rgba(16,185,129,0.12)', color: '#10B981' },
+            'KARIR INTERNASIONAL': { bg: 'rgba(139,92,246,0.12)', color: '#8B5CF6' },
+            'INFO LOKER':        { bg: 'rgba(241,101,39,0.12)', color: '#f16527' }
         };
         
         function getPillarBadge(pillar) {
@@ -114,26 +183,33 @@
             return `<span style="padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:600;background:${c.bg};color:${c.color}">${pillar}</span>`;
         }
         
-        function filterPillar(pillar) {
-            activePillar = pillar;
-            document.querySelectorAll('.pillar-tab').forEach(b => b.classList.remove('active'));
-            document.querySelector(`[data-pillar="${pillar}"]`).classList.add('active');
-            renderTable();
+        function applyContentBankFilters() {
+            const checkedPillars = Array.from(document.querySelectorAll('#pillar-checkboxes input:checked')).map(cb => cb.value);
+            const searchTerm = document.getElementById('search-content-bank').value.toLowerCase().trim();
+            
+            const filtered = allIdeas.filter(row => {
+                const pillarMatch = checkedPillars.includes((row['Pillar'] || '').toUpperCase());
+                
+                const searchMatch = !searchTerm || Object.values(row).some(val => 
+                    String(val || '').toLowerCase().includes(searchTerm)
+                );
+                
+                return pillarMatch && searchMatch;
+            });
+            
+            renderTable(filtered);
         }
         
-        function renderTable() {
+        function renderTable(data) {
             const tbody = document.getElementById('ideas-body');
-            const filtered = activePillar === 'all' 
-                ? allIdeas 
-                : allIdeas.filter(r => r['Pillar'] === activePillar);
             
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>Tidak ada ide untuk pillar ini.</td></tr>`;
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>Tidak ada ide yang sesuai filter/pencarian.</td></tr>`;
                 return;
             }
             
             let html = '';
-            filtered.forEach(row => {
+            data.forEach(row => {
                 // Use correct field names: "Ideas Status" (not "Status Review")
                 const status   = row['Ideas Status'] || 'Belum Diisi';
                 const id       = row['_id'] || (row['No'] + '-' + row['Pillar']);
@@ -175,7 +251,7 @@
         }
         
         function renderSummary() {
-            const pillars = ['Tips Karir','Karir Indonesia','Karir Internasional','Info Loker','Lainnya'];
+            const pillars = ['TIPS KARIR','KARIR INDONESIA','KARIR INTERNASIONAL','INFO LOKER'];
             const bar = document.getElementById('summary-bar');
             let html = '';
             pillars.forEach(p => {
@@ -193,19 +269,43 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const user = checkAuth('SMS'); // Hanya SMS & CMO
             if (!user) return;
-            
-            const result = await callApi('getContentBankData', { month: CONTENT_BANK_MONTH_TAB });
+            showLoading();
+            const result = await callApi('getContentBankData', { month: CONTENT_BANK_MONTH_PREFIX });
+            hideLoading();
             
             if (result && result.success) {
                 allIdeas = result.data;
                 renderSummary();
-                renderTable();
+                applyContentBankFilters();
             } else {
-                document.getElementById('ideas-body').innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--danger);">
-                    <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>
-                    Gagal memuat data.<br>
-                    <small style="color:var(--text-muted)">${result?.error || 'Cek koneksi atau nama tab spreadsheet Content Bank.'}</small>
-                </td></tr>`;
+                document.getElementById('ideas-body').innerHTML = `<tr><td colspan="11" class="text-center text-error" style="padding: 2rem;">Gagal memuat data: ${result.error}</td></tr>`;
+            }
+        });
+
+        // Handler form submit ide konten
+        document.getElementById('form-submit-idea').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = JSON.parse(localStorage.getItem('maxtring_user'));
+            
+            const payload = {
+                pillar: document.getElementById('input-pillar').value,
+                contentIdeas: document.getElementById('input-content-ideas').value,
+                referenceLink: document.getElementById('input-reference-link').value,
+                contentType: document.getElementById('input-content-type').value,
+                contentInfo: document.getElementById('input-content-info').value,
+                smsBriefDirection: document.getElementById('input-brief-direction').value,
+                submitter: user.name,
+                monthPrefix: CONTENT_BANK_MONTH_PREFIX
+            };
+            
+            const res = await callApi('submitContentIdea', payload);
+            if (res && res.success) {
+                alert('✅ ' + res.message);
+                closeModal('modal-submit-idea');
+                document.getElementById('form-submit-idea').reset();
+                window.location.reload();
+            } else {
+                alert('Gagal submit: ' + (res?.error || 'Error tidak diketahui'));
             }
         });
         

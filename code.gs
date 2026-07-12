@@ -142,6 +142,9 @@ function doPost(e) {
       case 'getContentBankData':
         response = getContentBankData(data.month);
         break;
+      case 'submitContentIdea':
+        response = submitContentIdea(data);
+        break;
       case 'scheduleIdea':
         response = scheduleIdea(data.ideaData);
         break;
@@ -165,35 +168,36 @@ function doPost(e) {
 function getPICData() {
   return {
     "sms": [
-      { name: "Riska Stephanie",          nickname: "Ika",    phone: "62895352730008",  email: "riskastphnie28@gmail.com" },
-      { name: "Naya Azani",               nickname: "Naya",   phone: "62895391527014",  email: "nayaazani13@gmail.com" },
-      { name: "Meitia Kurniawati",        nickname: "Mei",    phone: "6282247765358",   email: "meitiakurniawati@gmail.com" },
-      { name: "Muhamad Farhan",           nickname: "Aan",    phone: "6289531974196",   email: "aan.hans12@gmail.com" },
-      { name: "Kladya Khoirunisa' Hapsari", nickname: "Kladya", phone: "6285645111043", email: "kladyakhoirunisakh@gmail.com" },
-      { name: "Shellbitav Azazel",        nickname: "Shelby", phone: "6285172283505",   email: "ch3llb14z@gmail.com" }
+      { name: "Riska Stephanie", nickname: "Ika", phone: "62895352730008", email: "riskastphnie28@gmail.com", position: "Head" },
+      { name: "Naya Azani", nickname: "Naya", phone: "62895391527014", email: "nayaazani13@gmail.com", position: "Co-Head" },
+      { name: "Meitia Kurniawati", nickname: "Mei", phone: "6282247765358", email: "meitiakurniawati@gmail.com", position: "Staff" },
+      { name: "Muhamad Farhan", nickname: "Aan", phone: "6289531974196", email: "aan.hans12@gmail.com", position: "Staff" },
+      { name: "Kladya Khoirunisa' Hapsari", nickname: "Kladya", phone: "6285645111043", email: "kladyakhoirunisakh@gmail.com", position: "Staff" },
+      { name: "Shellbitav Azazel", nickname: "Shelby", phone: "6285172283505", email: "ch3llb14z@gmail.com", position: "Staff" }
     ],
     "gd": [
-      { name: "Fanisa Aulia Nur Hakmalia",   nickname: "Fanisa", phone: "6281357557510",  email: "fanisaanh@gmail.com" },
-      { name: "Dita Dara",                   nickname: "Dita",   phone: "6289665060586",  email: "dd.is.ditadara@gmail.com" },
-      { name: "Yusmita Alya Melanie",        nickname: "Alya",   phone: "6285792300256",  email: "yusmitaalya@gmail.com" },
-      { name: "Syafa Salsabila",             nickname: "Syafa",  phone: "62882003120378", email: "syafasalsabila226@gmail.com" },
-      { name: "Lidia Siregar",               nickname: "Lidia",  phone: "6281316207014",  email: "kembaroktober06@gmail.com" },
-      { name: "Mulqy Azzam",                 nickname: "Azzam",  phone: "6281770094378",  email: "mulqyazzam41@gmail.com" },
-      { name: "Fiorentina Auvillia Oenang",  nickname: "Fio",    phone: "6282181777228",  email: "Fiorentinaauvillia3@gmail.com" },
-      { name: "Muhammad Ramadhani",          nickname: "Dhani",  phone: "6282325795876",  email: "muhammadramadhani030909@gmail.com" }
+      { name: "Fanisa Aulia Nur Hakmalia", nickname: "Fanisa", phone: "6281357557510", email: "fanisaanh@gmail.com", position: "Head" },
+      { name: "Dita Dara", nickname: "Dita", phone: "6289665060586", email: "dd.is.ditadara@gmail.com", position: "Co-Head" },
+      { name: "Yusmita Alya Melanie", nickname: "Alya", phone: "6285792300256", email: "yusmitaalya@gmail.com", position: "Staff" },
+      { name: "Syafa Salsabila", nickname: "Syafa", phone: "62882003120378", email: "syafasalsabila226@gmail.com", position: "Staff" },
+      { name: "Lidia Siregar", nickname: "Lidia", phone: "6281316207014", email: "kembaroktober06@gmail.com", position: "Staff" },
+      { name: "Mulqy Azzam", nickname: "Azzam", phone: "6281770094378", email: "mulqyazzam41@gmail.com", position: "Staff" },
+      { name: "Fiorentina Auvillia Oenang", nickname: "Fio", phone: "6282181777228", email: "Fiorentinaauvillia3@gmail.com", position: "Staff" },
+      { name: "Muhammad Ramadhani", nickname: "Dhani", phone: "6282325795876", email: "muhammadramadhani030909@gmail.com", position: "Staff" }
     ],
     "cw": [
-      { name: "Benedict Jemima Cecilia Pietersz", nickname: "Ben",   phone: "6282114887824",  email: "bjcpietersz47@gmail.com" },
-      { name: "Ridatasa Nadiawati",               nickname: "Rida",  phone: "6289656144248",  email: "Ridatasa@gmail.com" },
-      { name: "Sidik Permana",                    nickname: "Sidik", phone: "6285321200416",  email: "sidiksipengelana@gmail.com" },
-      { name: "Sevia Rahmadani",                  nickname: "Via",   phone: "6285709598764",  email: "seviarahmadani9@gmail.com" },
-      { name: "Mayang Anggraini",                 nickname: "Mayang",phone: "628812756505",   email: "mayanganggraini242@gmail.com" },
-      { name: "Sri Rahayu Mulyaningsih",          nickname: "Ayu",   phone: "62895414845637", email: "srirahayuuu2937@gmail.com" }
+      { name: "Benedict Jemima Cecilia Pietersz", nickname: "Ben", phone: "6282114887824", email: "bjcpietersz47@gmail.com", position: "Head" },
+      { name: "Ridatasa Nadiawati", nickname: "Rida", phone: "6289656144248", email: "Ridatasa@gmail.com", position: "Co-Head" },
+      { name: "Sidik Permana", nickname: "Sidik", phone: "6285321200416", email: "sidiksipengelana@gmail.com", position: "Staff" },
+      { name: "Sevia Rahmadani", nickname: "Via", phone: "6285709598764", email: "seviarahmadani9@gmail.com", position: "Staff" },
+      { name: "Mayang Anggraini", nickname: "Mayang", phone: "628812756505", email: "mayanganggraini242@gmail.com", position: "Staff" },
+      { name: "Sri Rahayu Mulyaningsih", nickname: "Ayu", phone: "62895414845637", email: "srirahayuuu2937@gmail.com", position: "Staff" }
     ],
-    "talent": [], // Diisi manual oleh CMO berkala — jangan dihapus strukturnya
-    "cc": [],
+    "talent": [
+      // Diisi manual berkala oleh CMO — belum ada data resmi saat ini
+    ],
     "cmo": [
-      { name: "Muhammad Nurul Qolbi", nickname: "Obi", phone: "6285233142178", email: "qolbi@joy.internal" }
+      { name: "Muhammad Nurul Qolbi", nickname: "Obi", phone: "6285233142178", email: "qolbi@joy.internal", position: "CMO" }
     ]
   };
 }
@@ -202,36 +206,30 @@ function processLogin(username, password) {
   if (password !== 'biyooshi24!!') return { error: "Password salah!" };
   
   var pic = getPICData();
-  
-  // Build team list from PIC data (using nickname for dropdown)
-  function makeTeam(divKey) {
-    return (pic[divKey] || []).map(function(p) { return { nama: p.nickname, phone: p.phone }; });
-  }
-  
-  // Normalize to lowercase
-  var role = (username || '').toLowerCase().trim();
+  var usernameLower = username.toLowerCase().trim();
   
   var roleMap = {
-    'sms':       { role: 'SMS',    type: 'staff', teamKey: 'sms' },
-    'head-sms':  { role: 'SMS',    type: 'head',  teamKey: 'sms' },
-    'cw':        { role: 'CW',     type: 'staff', teamKey: 'cw' },
-    'head-cw':   { role: 'CW',     type: 'head',  teamKey: 'cw' },
-    'gd':        { role: 'GD',     type: 'staff', teamKey: 'gd' },
-    'head-gd':   { role: 'GD',     type: 'head',  teamKey: 'gd' },
-    'talent':    { role: 'Talent', type: 'staff', teamKey: 'talent' },
-    'head-talent': { role: 'Talent', type: 'head', teamKey: 'talent' },
-    'cmo':       { role: 'CMO',    type: 'cmo',   teamKey: 'cmo' }
+    'sms':        { divisionKey: 'sms',    role: 'SMS',    type: 'staff', filterPosition: ['Staff'] },
+    'head-sms':   { divisionKey: 'sms',    role: 'SMS',    type: 'head',  filterPosition: ['Head', 'Co-Head'] },
+    'gd':         { divisionKey: 'gd',     role: 'GD',     type: 'staff', filterPosition: ['Staff'] },
+    'head-gd':    { divisionKey: 'gd',     role: 'GD',     type: 'head',  filterPosition: ['Head', 'Co-Head'] },
+    'cw':         { divisionKey: 'cw',     role: 'CW',     type: 'staff', filterPosition: ['Staff'] },
+    'head-cw':    { divisionKey: 'cw',     role: 'CW',     type: 'head',  filterPosition: ['Head', 'Co-Head'] },
+    'talent':     { divisionKey: 'talent', role: 'Talent', type: 'staff', filterPosition: ['Staff', 'Head', 'Co-Head'] },
+    'cmo':        { divisionKey: 'cmo',    role: 'CMO',    type: 'cmo',   filterPosition: ['CMO'] }
   };
   
-  if (!roleMap[role]) return { error: "Role ID tidak ditemukan. Gunakan: sms, cw, gd, talent, head-sms, head-cw, head-gd, head-talent, atau cmo" };
+  var mapping = roleMap[usernameLower];
+  if (!mapping) return { error: "Role ID tidak ditemukan" };
   
-  var u = roleMap[role];
-  return {
-    success: true,
-    role:    u.role,
-    type:    u.type,
-    team:    makeTeam(u.teamKey)
-  };
+  var teamList = pic[mapping.divisionKey] || [];
+  var filteredTeam = teamList.filter(function(member) {
+    return mapping.filterPosition.indexOf(member.position) !== -1;
+  }).map(function(member) {
+    return { nama: member.name, posisi: member.position, phone: member.phone };
+  });
+  
+  return { success: true, role: mapping.role, type: mapping.type, team: filteredTeam };
 }
 
 
@@ -338,162 +336,168 @@ function getMatrixData(month) {
 // ==========================================
 // CONTENT BANK DATA — Multi-pillar block structure
 // ==========================================
-// IMPORTANT: Content Bank has 5 separate pillar tables arranged side-by-side.
-// Coordinates below MUST be verified manually against the actual spreadsheet.
-// Format: { startRow: <1-indexed>, startCol: <1-indexed, A=1> }
-// These are best-guess defaults — update after manual verification.
-var CONTENT_BANK_PILLAR_MAP = {
-  "Tips Karir":        { startRow: 5, startCol: 2  },  // Col B area
-  "Karir Indonesia":   { startRow: 5, startCol: 17 },  // Col Q area — VERIFY
-  "Karir Internasional": { startRow: 60, startCol: 2  }, // Below first two — VERIFY
-  "Info Loker":        { startRow: 60, startCol: 17 },  // VERIFY
-  "Lainnya":           { startRow: 115, startCol: 2 }   // Bottom block — VERIFY
-};
 
-// Column headers within each pillar block (0-indexed offsets from startCol)
-var CB_COLS = {
-  "No":                0,
-  "Submit Date":       1,
-  "Reference Link":    2,
-  "Submitter":         3,
-  "Content Ideas":     4,
-  "Content Type":      5,   // REELS / IGF
-  "Content Info":      6,   // Education / Promoting / For Fun / dst (tone)
-  "SMS Brief Direction": 7,
-  "Reviewer":          8,
-  "Ideas Status":      9,
-  "Tanggal Konten Up": 10,
-  "Reviewer Notes":    11
-};
+function getContentBankTabsForMonth(monthPrefix) {
+  var ss = SpreadsheetApp.openById(CONTENT_BANK_ID);
+  var allSheets = ss.getSheets();
+  var matched = [];
+  
+  // Regex: cocokkan "JULI", "JULI (2)", "JULI(3)", dst — case-insensitive, spasi opsional sebelum kurung
+  var pattern = new RegExp('^' + monthPrefix + '\\s*(\\(\\d+\\))?$', 'i');
+  
+  allSheets.forEach(function(sheet) {
+    if (pattern.test(sheet.getName().trim())) {
+      matched.push(sheet);
+    }
+  });
+  
+  // Urutkan: tab tanpa angka duluan (JULI), lalu JULI (2), JULI (3), dst
+  matched.sort(function(a, b) {
+    var numA = (a.getName().match(/\((\d+)\)/) || [0, 0])[1];
+    var numB = (b.getName().match(/\((\d+)\)/) || [0, 0])[1];
+    return parseInt(numA) - parseInt(numB);
+  });
+  
+  return matched;
+}
 
-// Known pillar order in Content Bank (left-to-right as they appear in the sheet)
-var CONTENT_BANK_PILLAR_NAMES = [
-  'Tips Karir',
-  'Karir Indonesia',
-  'Karir Internasional',
-  'Info Loker',
-  'Lainnya'
-];
+var ACTIVE_PILLARS = ["TIPS KARIR", "KARIR INDONESIA", "KARIR INTERNASIONAL", "INFO LOKER"];
+// "LAINNYA" sengaja tidak dimasukkan — diabaikan dulu sesuai arahan CMO
 
-// Column header names within each pillar block (left to right, exact order in sheet)
-// These are read dynamically from the header row — this list is a fallback label map.
-var CB_HEADER_LABELS = [
-  'No', 'Submit Date', 'Reference Link', 'Submitter',
-  'Content Ideas', 'Content Type', 'Content Info',
-  'SMS Brief Direction', 'Reviewer', 'Ideas Status',
-  'Tanggal Konten Up', 'Reviewer Notes'
-];
+function readPillarBlocksFromSheet(sheet) {
+  var values = sheet.getDataRange().getValues();
+  var results = [];
+  var scanLimit = Math.min(values.length, 15);
+  
+  // Cari baris yang berisi label pillar (misal "TIPS KARIR") dan baris header "No" tepat di bawahnya
+  for (var r = 0; r < scanLimit; r++) {
+    for (var c = 0; c < values[r].length; c++) {
+      var cellText = String(values[r][c] || '').trim().toUpperCase();
+      
+      if (ACTIVE_PILLARS.indexOf(cellText) !== -1) {
+        // Ketemu label pillar, cari baris header "No" di 1-3 baris berikutnya, kolom yang sama
+        for (var hr = r + 1; hr <= r + 3 && hr < values.length; hr++) {
+          if (String(values[hr][c] || '').trim() === "No") {
+            results.push({
+              pillarName: cellText,
+              headerRow: hr,
+              startCol: c
+            });
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  return results; // array of {pillarName, headerRow, startCol}
+}
 
-function getContentBankData(month) {
+function getContentBankData(monthPrefix) {
   try {
-    var ss = SpreadsheetApp.openById(CONTENT_BANK_ID);
-    var sheet = ss.getSheetByName(month);
-    // Fallback variations
-    if (!sheet) sheet = ss.getSheetByName(month.toUpperCase());
-    if (!sheet) {
-      var allSheets = ss.getSheets();
-      for (var k = 0; k < allSheets.length; k++) {
-        if (allSheets[k].getName().toLowerCase() === month.toLowerCase()) {
-          sheet = allSheets[k]; break;
+    var tabs = getContentBankTabsForMonth(monthPrefix);
+    if (tabs.length === 0) {
+      return { error: "Tidak ada tab yang cocok dengan '" + monthPrefix + "' di Content Bank." };
+    }
+    
+    var allResults = [];
+    var pillarHeaders = ["No", "Submit Date", "Reference Link", "Submitter", "Content Ideas", "Content Type", "Content Info", "SMS Brief Direction", "Reviewer", "Ideas Status", "Tanggal Konten Up", "Reviewer Notes"];
+    
+    tabs.forEach(function(sheet) {
+      var values = sheet.getDataRange().getDisplayValues();
+      var blocks = readPillarBlocksFromSheet(sheet);
+      
+      blocks.forEach(function(block) {
+        // Baca sampai 50 baris ke bawah dari headerRow, di kolom startCol s.d. startCol+11 (12 kolom)
+        for (var i = block.headerRow + 1; i < Math.min(block.headerRow + 51, values.length); i++) {
+          var rowSlice = values[i].slice(block.startCol, block.startCol + 12);
+          if (!rowSlice[0]) continue; // skip baris kosong (No kosong)
+          
+          var obj = {};
+          for (var h = 0; h < pillarHeaders.length; h++) {
+            obj[pillarHeaders[h]] = rowSlice[h] || '';
+          }
+          obj['Pillar'] = block.pillarName; // tag pillar
+          obj['_sourceTab'] = sheet.getName(); // untuk keperluan submitContentIdea nanti
+          obj['_sheetRow'] = i + 1; // posisi baris asli (1-indexed), untuk referensi update
+          
+          // Generate an ID similar to what was there
+          obj['_id'] = obj['No'] + '-' + obj['Pillar'];
+          
+          allResults.push(obj);
         }
-      }
-    }
-    if (!sheet) return { error: "Tab '" + month + "' tidak ditemukan di Content Bank." };
+      });
+    });
     
-    var allValues = sheet.getValues();
-    if (allValues.length === 0) return { success: true, data: [] };
-    
-    // ---- DYNAMIC MULTI-BLOCK HEADER DETECTION ----
-    // Content Bank has 5 pillar tables side by side.
-    // Each pillar table starts with a "No" column header.
-    // We scan rows to find the row that has the most "No" occurrences.
-    var headerInfo = findAllHeaderBlockPositions(allValues, 20);
-    if (!headerInfo) {
-      Logger.log('getContentBankData: No header blocks found. Tab: ' + sheet.getName());
-      return { error: "Tidak ada header block ('No' column) ditemukan di Content Bank tab '" + month + "'." };
-    }
-    
-    var headerRowIndex = headerInfo.rowIndex;
-    var blockStarts    = headerInfo.colPositions; // e.g. [1, 13, 25, 37, 49]
-    
-    Logger.log('getContentBankData: Header row = ' + headerRowIndex + ', block starts = ' + JSON.stringify(blockStarts));
-    
-    // Determine block end columns (each block ends where next starts, or end of data)
-    var totalCols = allValues[0].length;
-    var blockEndCols = [];
-    for (var b = 0; b < blockStarts.length; b++) {
-      blockEndCols.push(b + 1 < blockStarts.length ? blockStarts[b + 1] : totalCols);
-    }
-    
-    var result = [];
-    
-    for (var p = 0; p < blockStarts.length; p++) {
-      var pillarName = CONTENT_BANK_PILLAR_NAMES[p] || ('Pillar ' + (p + 1));
-      var startC     = blockStarts[p];
-      var endC       = blockEndCols[p];
-      
-      // Extract headers for this block from the header row
-      var blockHeaders = [];
-      for (var hc = startC; hc < endC; hc++) {
-        var hVal = String(allValues[headerRowIndex][hc]).trim();
-        blockHeaders.push(hVal || CB_HEADER_LABELS[hc - startC] || ('Col' + hc));
-      }
-      
-      Logger.log('getContentBankData: Pillar "' + pillarName + '" headers = ' + JSON.stringify(blockHeaders));
-      
-      // Build header map for this block
-      var blockHeaderMap = {};
-      for (var bh = 0; bh < blockHeaders.length; bh++) {
-        blockHeaderMap[blockHeaders[bh]] = bh; // relative offset from startC
-      }
-      
-      // Helper to get value by header name with fallback to positional index
-      function getField(row, name, fallbackIdx) {
-        var idx = blockHeaderMap[name];
-        if (idx !== undefined && startC + idx < row.length) return row[startC + idx];
-        if (fallbackIdx !== undefined && startC + fallbackIdx < row.length) return row[startC + fallbackIdx];
-        return '';
-      }
-      
-      var emptyCount = 0;
-      for (var r = headerRowIndex + 1; r < allValues.length; r++) {
-        var rowData = allValues[r];
-        var noVal = String(getField(rowData, 'No', 0)).trim();
-        
-        if (!noVal || noVal === '') {
-          emptyCount++;
-          if (emptyCount >= 5) break; // 5 consecutive empty No = end of block
-          continue;
-        }
-        emptyCount = 0;
-        
-        var ideaId = noVal + '-' + pillarName;
-        result.push({
-          '_id':               ideaId,
-          'Pillar':            pillarName,
-          'No':                noVal,
-          'Submit Date':       getField(rowData, 'Submit Date',       1)  || '',
-          'Reference Link':    getField(rowData, 'Reference Link',    2)  || '',
-          'Submitter':         getField(rowData, 'Submitter',         3)  || '',
-          'Content Ideas':     getField(rowData, 'Content Ideas',     4)  || '',
-          'Content Type':      getField(rowData, 'Content Type',      5)  || '',
-          'Content Info':      getField(rowData, 'Content Info',      6)  || '',
-          'SMS Brief Direction': getField(rowData, 'SMS Brief Direction', 7) || '',
-          'Reviewer':          getField(rowData, 'Reviewer',          8)  || '',
-          'Ideas Status':      getField(rowData, 'Ideas Status',      9)  || '',
-          'Tanggal Konten Up': getField(rowData, 'Tanggal Konten Up', 10) || '',
-          'Reviewer Notes':    getField(rowData, 'Reviewer Notes',    11) || ''
-        });
-      }
-    }
-    
-    Logger.log('getContentBankData: Total ideas returned = ' + result.length);
-    if (result.length > 0) Logger.log('getContentBankData: First idea = ' + JSON.stringify(result[0]));
-    
-    return { success: true, data: result };
-  } catch(e) {
-    Logger.log('getContentBankData ERROR: ' + e.toString());
+    return { success: true, data: allResults };
+  } catch (e) {
     return { error: e.toString() };
+  }
+}
+
+function submitContentIdea(data) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    
+    var tabs = getContentBankTabsForMonth(data.monthPrefix);
+    if (tabs.length === 0) {
+      return { error: "Tidak ada tab aktif untuk bulan '" + data.monthPrefix + "'." };
+    }
+    var targetSheet = tabs[tabs.length - 1]; // selalu tulis ke tab TERAKHIR (paling baru)
+    
+    var blocks = readPillarBlocksFromSheet(targetSheet);
+    var targetBlock = blocks.find(function(b) { return b.pillarName === data.pillar.toUpperCase(); });
+    
+    if (!targetBlock) {
+      return { error: "Pillar '" + data.pillar + "' tidak ditemukan di tab " + targetSheet.getName() };
+    }
+    
+    // Cari baris kosong pertama dalam blok ini (maks 50 baris)
+    var values = targetSheet.getDataRange().getValues();
+    var emptyRow = -1;
+    var lastNo = -1;
+    
+    for (var i = targetBlock.headerRow + 1; i < Math.min(targetBlock.headerRow + 51, values.length); i++) {
+      var noVal = values[i][targetBlock.startCol];
+      if (noVal === '' || noVal === null) {
+        emptyRow = i;
+        break;
+      }
+      lastNo = parseInt(noVal) || lastNo;
+    }
+    
+    if (emptyRow === -1) {
+      return { error: "Blok pillar '" + data.pillar + "' di tab " + targetSheet.getName() + " sudah penuh (50 baris). Minta SMS buat tab overflow baru secara manual." };
+    }
+    
+    var today = new Date();
+    var todayStr = Utilities.formatDate(today, "GMT+7", "dd/MM/yy");
+    
+    var newRow = [
+      lastNo + 1,                    // No
+      todayStr,                      // Submit Date
+      data.referenceLink || '',      // Reference Link
+      data.submitter,                // Submitter
+      data.contentIdeas,             // Content Ideas
+      data.contentType,              // Content Type (IGF/REELS)
+      data.contentInfo,              // Content Info
+      data.smsBriefDirection || '',  // SMS Brief Direction
+      '',                            // Reviewer (kosong dulu)
+      'Unreviewed',                  // Ideas Status
+      '',                            // Tanggal Konten Up
+      ''                             // Reviewer Notes
+    ];
+    
+    targetSheet.getRange(emptyRow + 1, targetBlock.startCol + 1, 1, newRow.length).setValues([newRow]);
+    SpreadsheetApp.flush();
+    
+    return { success: true, message: "Ide berhasil disimpan di " + targetSheet.getName() + ", baris pillar " + data.pillar };
+    
+  } catch (e) {
+    return { error: e.toString() };
+  } finally {
+    lock.releaseLock();
   }
 }
 

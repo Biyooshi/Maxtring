@@ -204,7 +204,9 @@
         
         async function fetchAndPopulateDraggables() {
             const container = document.getElementById('external-events');
-            const result = await callApi('getContentBankData', { month: CONTENT_BANK_MONTH_TAB });
+            showLoading();
+            const result = await callApi('getContentBankData', { month: CONTENT_BANK_MONTH_PREFIX });
+            hideLoading();
             
             if (result && result.success) {
                 let html = '';
