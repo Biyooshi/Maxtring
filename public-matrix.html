@@ -44,6 +44,32 @@
                 </a>
             </div>
         </div>
+
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1.5rem;">
+            <button class="btn btn-outline btn-sm" onclick="location.reload()">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+            </button>
+            
+            <select id="filter-jenis" class="form-select" style="max-width:160px;" onchange="applyFilters()">
+                <option value="all">Semua Jenis Konten</option>
+                <option value="reels">Reels</option>
+                <option value="feeds">Feeds</option>
+                <option value="story">Story</option>
+            </select>
+            
+            <select id="filter-status" class="form-select" style="max-width:160px;" onchange="applyFilters()">
+                <option value="all">Semua Status</option>
+                <option value="pending">Pending</option>
+                <option value="on process">On Process</option>
+                <option value="done">Done</option>
+            </select>
+            
+            <div style="position:relative;flex:1;min-width:200px;max-width:320px;">
+                <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:0.9rem;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+                <input type="text" id="search-pic" class="form-input" style="padding-left:2.5rem;" 
+                       placeholder="Cari nama PIC (CW/GD/SMS)..." oninput="applyFilters()">
+            </div>
+        </div>
         
         <div class="card">
             <div class="table-container">
@@ -58,13 +84,13 @@
                             <th>References</th>
                             <th>SMS Ideas Direction</th>
                             <th>Brief CW</th>
-                            <th>PJ CW</th>
+                            <th>PIC CW</th>
                             <th>Design GD</th>
-                            <th>PJ GD</th>
-                            <th>LINK VIDEO</th>
-                            <th>PJ TALENT</th>
+                            <th>PIC GD</th>
+                            <th>VIDEO TALENT</th>
+                            <th>PIC TALENT</th>
                             <th>Status Upload SMS</th>
-                            <th>PJ SMS</th>
+                            <th>PIC SMS</th>
                             <th>Overall Status</th>
                         </tr>
                     </thead>
@@ -87,6 +113,89 @@
 
     <script src="script.js"></script>
     <script>
+        let allMatrixData = [];
+
+        function applyFilters() {
+            const jenisFilter = document.getElementById('filter-jenis').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            const picSearch = document.getElementById('search-pic').value.toLowerCase().trim();
+            
+            let filtered = allMatrixData.filter(row => {
+                const jenis = (row['Jenis Content'] || '').toLowerCase();
+                const status = computeOverallStatus(row).toLowerCase();
+                const picMatch = !picSearch || 
+                    (row['PJ CW'] || '').toLowerCase().includes(picSearch) ||
+                    (row['PJ GD'] || '').toLowerCase().includes(picSearch) ||
+                    (row['PJ SMS'] || '').toLowerCase().includes(picSearch) ||
+                    (row['PJ TALENT'] || '').toLowerCase().includes(picSearch);
+                
+                return (jenisFilter === 'all' || jenis === jenisFilter)
+                    && (statusFilter === 'all' || status === statusFilter)
+                    && picMatch;
+            });
+            
+            renderMatrixTable(filtered);
+        }
+
+        function renderMatrixTable(data) {
+            const tbody = document.getElementById('matrix-body');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="17" style="text-align:center;padding:2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>Tidak ada data yang sesuai filter.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach(row => {
+                const jenisContent = (row['Jenis Content'] || '').trim();
+                const jenisContentLower = jenisContent.toLowerCase();
+                const overallStatus = computeOverallStatus(row);
+
+                const JENIS_KONTEN_CONFIG = {
+                  'reels': { icon: '🎬', label: 'Reels', bg: 'rgba(139,92,246,0.12)', color: 'var(--purple)' },
+                  'feeds': { icon: '🖼️', label: 'Feeds', bg: 'rgba(16,185,129,0.12)', color: 'var(--secondary)' },
+                  'story': { icon: '📸', label: 'Story', bg: 'rgba(241,101,39,0.12)', color: 'var(--accent)' }
+                };
+                const jkConfig = JENIS_KONTEN_CONFIG[jenisContentLower] || { icon: '❓', label: jenisContent || 'N/A', bg: 'rgba(0,0,0,0.05)', color: 'var(--text-muted)' };
+                const needsVideo = jenisContentLower === 'reels';
+                
+                const linkCell = (val, label) => val 
+                    ? `<a href="${val}" target="_blank" style="color:var(--accent);font-weight:600;">${label}</a>` 
+                    : '<span style="color:var(--text-muted)">-</span>';
+                
+                const talentVideo = row['LINK VIDEO'] 
+                    ? linkCell(row['LINK VIDEO'], 'LINK VIDEO DISINI')
+                    : '<span style="color:var(--text-muted);font-size:0.85rem;">-</span>';
+                const talentPJ = needsVideo ? (row['PJ TALENT'] || '-') 
+                    : '<span style="color:var(--text-muted);font-style:italic;">-</span>';
+                
+                html += `
+                    <tr>
+                        <td style="font-family:monospace;font-weight:600;">${row['No'] || '-'}</td>
+                        <td>${row['Upload Deadline'] || '-'}</td>
+                        <td>${row['Day Upload'] || '-'}<br><small style="color:var(--text-muted)">${row['Time Upload'] || ''}</small></td>
+                        <td>
+                            <span style="padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:600;background:${jkConfig.bg};color:${jkConfig.color}">
+                                ${jkConfig.icon} ${jkConfig.label}
+                            </span>
+                        </td>
+                        <td style="font-weight:600;max-width:180px;">${row['Content Ideas'] || '-'}</td>
+                        <td>${row['References'] ? `<a href="${row['References']}" target="_blank" style="color:var(--accent)">Ref</a>` : '-'}</td>
+                        <td style="font-size:0.85rem;max-width:150px;">${row['SMS Ideas Direction'] || '-'}</td>
+                        <td>${linkCell(row['Brief CW'], 'HASIL TULISAN CHECK DISINI')}</td>
+                        <td>${row['PJ CW'] || '-'}</td>
+                        <td>${linkCell(row['Design GD'], 'HASIL DESIGN CEK DISINI')}</td>
+                        <td>${row['PJ GD'] || '-'}</td>
+                        <td>${talentVideo}</td>
+                        <td>${talentPJ}</td>
+                        <td><span class="badge ${getBadgeClass(row['Status Upload SMS'])}">${row['Status Upload SMS'] || '-'}</span></td>
+                        <td>${row['PJ SMS'] || '-'}</td>
+                        <td><span class="badge ${getBadgeClass(overallStatus)}">${overallStatus}</span></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const user = checkAuth(); // Semua bisa akses
             if (!user) return;
@@ -95,50 +204,8 @@
             const tbody = document.getElementById('matrix-body');
             
             if (result && result.success && result.data.length > 0) {
-                let html = '';
-                result.data.forEach(row => {
-                    const jenisContent = (row['Jenis Content'] || '').toLowerCase();
-                    const isReels = jenisContent === 'reels';
-                    const overallStatus = computeOverallStatus(row); // dihitung, bukan dari spreadsheet
-                    
-                    // Helper: render a link cell
-                    const linkCell = (val, label) => val 
-                        ? `<a href="${val}" target="_blank" style="color:var(--accent);font-weight:600;">${label}</a>` 
-                        : '<span style="color:var(--text-muted)">-</span>';
-                    
-                    // For Feeds, Talent columns show a dash with note
-                    const talentVideo = isReels 
-                        ? linkCell(row['LINK VIDEO'], 'Link Video')
-                        : '<span style="color:var(--text-muted);font-size:0.8rem;font-style:italic;">Feeds</span>';
-                    const talentPJ = isReels ? (row['PJ TALENT'] || '-') 
-                        : '<span style="color:var(--text-muted);font-style:italic;">-</span>';
-                    
-                    html += `
-                        <tr>
-                            <td style="font-family:monospace;font-weight:600;">${row['No'] || '-'}</td>
-                            <td>${row['Upload Deadline'] || '-'}</td>
-                            <td>${row['Day Upload'] || '-'}<br><small style="color:var(--text-muted)">${row['Time Upload'] || ''}</small></td>
-                            <td>
-                                <span style="padding:0.2rem 0.6rem;border-radius:999px;font-size:0.78rem;font-weight:600;background:${isReels ? 'rgba(139,92,246,0.12)' : 'rgba(16,185,129,0.12)'};color:${isReels ? 'var(--purple)' : 'var(--secondary)'}">
-                                    ${isReels ? '🎬 Reels' : '🖼️ Feeds'}
-                                </span>
-                            </td>
-                            <td style="font-weight:600;max-width:180px;">${row['Content Ideas'] || '-'}</td>
-                            <td>${row['References'] ? `<a href="${row['References']}" target="_blank" style="color:var(--accent)">Ref</a>` : '-'}</td>
-                            <td style="font-size:0.85rem;max-width:150px;">${row['SMS Ideas Direction'] || '-'}</td>
-                            <td>${linkCell(row['Brief CW'], 'Draft CW')}</td>
-                            <td>${row['PJ CW'] || '-'}</td>
-                            <td>${linkCell(row['Design GD'], 'Design')}</td>
-                            <td>${row['PJ GD'] || '-'}</td>
-                            <td>${talentVideo}</td>
-                            <td>${talentPJ}</td>
-                            <td><span class="badge ${getBadgeClass(row['Status Upload SMS'])}">${row['Status Upload SMS'] || '-'}</span></td>
-                            <td>${row['PJ SMS'] || '-'}</td>
-                            <td><span class="badge ${getBadgeClass(overallStatus)}">${overallStatus}</span></td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
+                allMatrixData = result.data;
+                renderMatrixTable(allMatrixData);
             } else {
                 tbody.innerHTML = `<tr><td colspan="17" style="text-align:center;padding:2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size:2rem;margin-bottom:1rem;display:block;"></i>Tidak ada data Matrix untuk bulan ini.<br><small style="color:var(--text-muted)">Pastikan nama tab di spreadsheet sudah benar (contoh: "Content JUNI").</small></td></tr>`;
             }

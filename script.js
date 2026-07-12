@@ -32,20 +32,21 @@ function parseIndonesianDate(dateStr) {
 // ============================================
 function computeOverallStatus(row) {
   const statusSMS = (row['Status Upload SMS'] || '').toLowerCase();
-  if (statusSMS === 'posted') return 'Posted';
+  if (statusSMS === 'posted') return 'DONE';
 
-  const isReels   = (row['Jenis Content'] || '').toLowerCase() === 'reels';
+  const jenisContentLower = (row['Jenis Content'] || '').toLowerCase();
   const hasBrief  = !!row['Brief CW'];
   const hasDesign = !!row['Design GD'];
   const hasVideo  = !!row['LINK VIDEO'];
+  const needsVideo = jenisContentLower === 'reels';
 
-  const allAssetsReady = isReels
+  const allAssetsReady = needsVideo
     ? (hasBrief && hasDesign && hasVideo)
     : (hasBrief && hasDesign);
 
-  if (allAssetsReady) return 'Ready to Upload';
-  if (hasBrief || hasDesign || hasVideo) return 'On Process';
-  return 'Not Started';
+  if (allAssetsReady) return 'DONE';
+  if (hasBrief || hasDesign || hasVideo) return 'ON PROCESS';
+  return 'PENDING';
 }
 
 
@@ -171,20 +172,37 @@ function closeModal(modalId) {
 }
 
 function getBadgeClass(status) {
-  if (!status || status === 'Not Started') return 'badge-ns';
-  if (status === 'Approved') return 'badge-app';
-  if (status === 'Submitted' || status === 'On Process' || status === 'Scheduled') return 'badge-prog';
-  if (status === 'Revisi') return 'badge-rev';
-  if (status === 'Posted') return 'badge-post';
-  if (status === 'Accepted') return 'badge-sub';
+  const s = (status || '').toUpperCase();
+  if (s === 'PENDING' || s === 'NOT STARTED') return 'badge-ns';
+  if (s === 'DONE' || s === 'POSTED' || s === 'APPROVED') return 'badge-app';
+  if (s === 'ON PROCESS' || s === 'SUBMITTED' || s === 'SCHEDULED') return 'badge-prog';
+  if (s === 'REVISI') return 'badge-rev';
+  if (s === 'ACCEPTED') return 'badge-sub';
   return 'badge-ns';
 }
 
 // ============================================
-// SLA CALCULATION
+// SLA & DEADLINE CALCULATION
 // ============================================
-function calculateSLA(deadlineStr) {
-  const deadline = parseIndonesianDate(deadlineStr);
+function calculateInternalDeadline(uploadDeadlineStr, division) {
+  const uploadDate = parseIndonesianDate(uploadDeadlineStr);
+  if (!uploadDate) return null;
+
+  const bufferDays = {
+    'CW': 3,
+    'GD': 2,
+    'Talent': 2,
+    'QC': 1
+  };
+
+  const buffer = bufferDays[division] ?? 1;
+  const internalDate = new Date(uploadDate);
+  internalDate.setDate(internalDate.getDate() - buffer);
+  return internalDate;
+}
+
+function calculateSLA(deadlineStrOrDate) {
+  const deadline = deadlineStrOrDate instanceof Date ? new Date(deadlineStrOrDate) : parseIndonesianDate(deadlineStrOrDate);
   if (!deadline) return { text: "No SLA", color: "var(--text-muted)", progress: 0 };
   
   const now = new Date();

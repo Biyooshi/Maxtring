@@ -21,12 +21,12 @@
   --border:      #E5E7EB;
   
   /* Status badge colors */
-  --status-ns:   #9CA3AF;   /* Not Started — Gray */
-  --status-prog: #f16527;   /* In Progress — Orange */
-  --status-rev:  #EF4444;   /* Revisi      — Red */
-  --status-app:  #10B981;   /* Approved    — Green */
-  --status-post: #8B5CF6;   /* Posted      — Purple */
-  --status-sub:  #3B82F6;   /* Submitted   — Blue */
+  --status-ns:   #9CA3AF;   /* PENDING */
+  --status-prog: #10B981;   /* ON PROCESS */
+  --status-rev:  #EF4444;   /* REVISI */
+  --status-app:  #8B5CF6;   /* DONE */
+  --status-post: #8B5CF6;   /* POSTED */
+  --status-sub:  #f16527;   /* ACCEPTED / SUBMITTED */
   
   /* Layout */
   --radius-sm: 8px;

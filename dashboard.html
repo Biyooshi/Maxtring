@@ -84,7 +84,8 @@
                         <tr>
                             <th>Task ID</th>
                             <th>Judul Konten</th>
-                            <th>Deadline SLA</th>
+                            <th>Deadline Internal (Divisimu)</th>
+                            <th>Deadline Upload Final</th>
                             <th>Status Matrix</th>
                             <th>Status Divisi</th>
                             <th>Aksi</th>
@@ -172,10 +173,13 @@
                 let statusCounts = { "Not Started": 0, "On Process": 0, "Approved": 0, "Posted": 0 };
                 
                 const filteredData = data.filter(row => {
-                    statusCounts[row["Overall Status"]] = (statusCounts[row["Overall Status"]] || 0) + 1;
+                    const computedStatus = computeOverallStatus(row);
+                    row["Overall Status"] = computedStatus; // Override
+                    
+                    statusCounts[computedStatus] = (statusCounts[computedStatus] || 0) + 1;
                     
                     if (user.role === 'CMO') return true;
-                    if (row["Overall Status"] === "Posted") return false; // Hide posted for clean view
+                    if (computedStatus === "DONE") return false; // Hide done for clean view
                     
                     // Simple routing: if staff/head, they see everything for now for demo purposes, 
                     // ideally we filter by PIC Name here if that column existed.
@@ -192,19 +196,24 @@
                     if (myStatus === "Revisi") revCount++;
                     
                     // Calculate SLA based on Role
-                    // Originally we used Deadline CW/GD, but now we use Upload Deadline as base for all.
-                    let slaInfo = calculateSLA(row["Upload Deadline"]);
+                    const internalDate = calculateInternalDeadline(row["Upload Deadline"], user.role);
+                    const slaInfo = calculateSLA(internalDate || row["Upload Deadline"]); // Fallback if parse fails
+                    
                     if (slaInfo.text.includes("Overdue") && myStatus !== 'Approved' && myStatus !== 'Posted') overdueCount++;
                     
+                    const internalDateStr = internalDate ? internalDate.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'}) : '-';
+
                     // Render Row
                     html += `
                         <tr>
                             <td style="font-family: monospace; font-weight: 600;">${row["No"] || '-'}</td>
                             <td style="font-weight: 600;">${row["Content Ideas"] || '-'}</td>
                             <td>
-                                <div style="font-size: 0.85rem; font-weight: 600; color: ${slaInfo.color}; margin-bottom: 0.25rem;">${slaInfo.text}</div>
+                                <div style="font-size: 0.85rem; font-weight: 600; color: ${slaInfo.color}; margin-bottom: 0.25rem;">${slaInfo.text} (${internalDateStr})</div>
                                 <div class="progress-container"><div class="progress-bar" style="width: ${slaInfo.progress}%; background-color: ${slaInfo.color};"></div></div>
-                                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem;">${row["Upload Deadline"] || 'Tidak diset'}</div>
+                            </td>
+                            <td>
+                                <div style="font-size: 0.85rem; font-weight: 600;">${row["Upload Deadline"] || '-'}</div>
                             </td>
                             <td><span class="badge ${getBadgeClass(row["Overall Status"])}">${row["Overall Status"] || 'Not Started'}</span></td>
                             <td><span class="badge ${getBadgeClass(myStatus)}">${myStatus}</span></td>
@@ -236,10 +245,10 @@
                     new Chart(ctx, {
                         type: 'doughnut',
                         data: {
-                            labels: ['Not Started', 'On Process', 'Approved', 'Posted'],
+                            labels: ['PENDING', 'ON PROCESS', 'DONE'],
                             datasets: [{
-                                data: [statusCounts["Not Started"], statusCounts["On Process"], statusCounts["Approved"], statusCounts["Posted"]],
-                                backgroundColor: ['#9CA3AF', '#F59E0B', '#10B981', '#8B5CF6'],
+                                data: [statusCounts["PENDING"]||0, statusCounts["ON PROCESS"]||0, statusCounts["DONE"]||0],
+                                backgroundColor: ['#9CA3AF', '#10B981', '#8B5CF6'],
                                 borderWidth: 0
                             }]
                         },

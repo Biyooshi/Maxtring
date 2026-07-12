@@ -261,6 +261,23 @@ function getMatrixSheet(spreadsheetId, month) {
   return null;
 }
 
+function extractLinkFromCell(sheet, row, col) {
+  try {
+    var richValue = sheet.getRange(row, col).getRichTextValue();
+    if (richValue) {
+      var url = richValue.getLinkUrl();
+      if (url) return url;
+      // Cek juga per-bagian teks (kalau cuma sebagian kata yang jadi link)
+      var runs = richValue.getRuns();
+      for (var i = 0; i < runs.length; i++) {
+        var runUrl = runs[i].getLinkUrl();
+        if (runUrl) return runUrl;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
 function getMatrixData(month) {
   try {
     var sheet = getMatrixSheet(MATRIX_ID, month);
@@ -283,12 +300,26 @@ function getMatrixData(month) {
     Logger.log('getMatrixData: Header found at row=' + headerPos.rowIndex + ', col=' + headerPos.colIndex);
     Logger.log('getMatrixData: Headers = ' + JSON.stringify(headers.slice(0, 10)));
     
+    var linkColumns = ["Brief CW", "Design GD", "LINK VIDEO"];
+
     var result = [];
     for (var i = headerPos.rowIndex + 1; i < allValues.length; i++) {
       var row = allValues[i].slice(headerPos.colIndex);
       // Skip rows where the "No" column (first col of the slice) is empty
       if (!row[0] || String(row[0]).trim() === '') continue;
       var obj = rowToObject(row, headers);
+      
+      // Timpa dengan URL asli (bukan teks display) untuk kolom-kolom link
+      linkColumns.forEach(function(colName) {
+        var idxInHeaders = headers.indexOf(colName);
+        if (idxInHeaders !== -1) {
+          var actualCol = headerPos.colIndex + idxInHeaders + 1; // 1-indexed untuk getRange
+          var actualRow = i + 1; // 1-indexed
+          var url = extractLinkFromCell(sheet, actualRow, actualCol);
+          obj[colName] = url || ""; // kalau tidak ada link asli (bukan biru), kosongkan
+        }
+      });
+
       // Unified alias for pillar/jenis content field
       obj['_jenisContent'] = obj['Jenis Content'] || obj['Jenis Konten'] || '';
       result.push(obj);
