@@ -194,7 +194,7 @@
             const user = checkAuth('SMS'); // Hanya SMS & CMO
             if (!user) return;
             
-            const result = await callApi('getContentBankData', { month: 'Juni' });
+            const result = await callApi('getContentBankData', { month: CONTENT_BANK_MONTH_TAB });
             
             if (result && result.success) {
                 allIdeas = result.data;
@@ -216,7 +216,7 @@
                 return;
             }
             const res = await callApi('scheduleIdea', {
-                ideaData: { id, title, date, month: 'Juni' }
+                ideaData: { id, title, date, month: MATRIX_MONTH_TAB }
             });
             if (res && res.success) {
                 alert(`✅ Berhasil dijadwalkan!\nTask No: ${res.taskId}`);
@@ -229,102 +229,5 @@
 </body>
 </html>
 
-        
-        <div class="card">
-            <div class="table-container">
-                <table id="ideas-table">
-                    <thead>
-                        <tr>
-                            <th>ID (No-Pillar)</th>
-                            <th>Pillar / Jenis Konten</th>
-                            <th>Ide Konten</th>
-                            <th>Brief Detail</th>
-                            <th>PIC SMS</th>
-                            <th>Status Review</th>
-                            <th>Aksi Jadwal</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ideas-body">
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 3rem;">
-                                <div class="spinner" style="margin: 0 auto;"></div>
-                                <p class="text-muted">Memuat data ide...</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-    
-    <footer>
-        <p>Made by Muhammad Nurul Qolbi (CMO - JOY) &copy; 2026</p>
-    </footer>
 
-    <div id="loader">
-        <div class="spinner"></div>
-    </div>
 
-    <script src="script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const user = checkAuth('SMS'); // Hanya SMS & CMO
-            if (!user) return;
-            
-            const result = await callApi('getContentBankData', { month: 'Juni' });
-            const tbody = document.getElementById('ideas-body');
-            
-            if (result && result.success && result.data.length > 0) {
-                let html = '';
-                result.data.forEach(row => {
-                    const status = row["Status Review"] || 'Unreviewed';
-                    const noVal = row["No"] || '';
-                    const pillarVal = row["Jenis konten"] || '';
-                    const customId = noVal + '-' + pillarVal;
-                    
-                    html += `
-                        <tr>
-                            <td style="font-family: monospace; font-weight: 600;">${customId}</td>
-                            <td><span style="padding: 0.2rem 0.5rem; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 0.85rem;">${pillarVal || '-'}</span></td>
-                            <td style="font-weight: 600;">${row["Content Ideas"] || '-'}</td>
-                            <td style="font-size: 0.85rem; max-width: 250px;">${row["Brief Detail / Copywriting"] || '-'}</td>
-                            <td><i class="fa-solid fa-user-circle text-muted"></i> ${row["PIC SMS"] || '-'}</td>
-                            <td><span class="badge ${getBadgeClass(status)}">${status}</span></td>
-                            <td>
-                                ${status === 'Accepted' ? `
-                                    <button class="btn btn-primary btn-sm" onclick="scheduleIdea('${customId}', '${(row["Content Ideas"]||'').replace(/'/g, "\\'")}')">
-                                        <i class="fa-solid fa-calendar-plus"></i> Jadwalkan Manual
-                                    </button>
-                                ` : (status === 'Scheduled' ? '<span class="text-muted"><i class="fa-solid fa-check"></i> Sudah Dijadwalkan</span>' : '-')}
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-            } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;"><i class="fa-solid fa-inbox text-muted" style="font-size: 2rem; margin-bottom: 1rem; display:block;"></i>Tidak ada data ide.</td></tr>`;
-            }
-        });
-        
-        async function scheduleIdea(id, title) {
-            // Ini untuk manual, tapi disarankan drag & drop di kalender
-            const date = prompt(`Masukkan tanggal tayang untuk "${title}"\nFormat YYYY-MM-DD (Contoh: 2026-06-15):`);
-            if (date) {
-                const res = await callApi('scheduleIdea', {
-                    ideaData: {
-                        id: id,
-                        title: title,
-                        date: date,
-                        month: 'Juni'
-                    }
-                });
-                
-                if (res && res.success) {
-                    alert(`Berhasil dijadwalkan ke Matrix!\nTask ID: ${res.taskId}`);
-                    window.location.reload();
-                }
-            }
-        }
-    </script>
-</body>
-</html>

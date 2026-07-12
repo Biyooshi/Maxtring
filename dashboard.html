@@ -157,7 +157,7 @@
                 document.getElementById('cmo-analytics').style.display = 'block';
             }
             
-            const result = await callApi('getMatrixData', { month: 'Juni' });
+            const result = await callApi('getMatrixData', { month: MATRIX_MONTH_TAB });
             const tbody = document.getElementById('tasks-body');
             
             if (result && result.success) {

@@ -91,7 +91,7 @@
             const user = checkAuth(); // Semua bisa akses
             if (!user) return;
             
-            const result = await callApi('getMatrixData', { month: 'Juni' });
+            const result = await callApi('getMatrixData', { month: MATRIX_MONTH_TAB });
             const tbody = document.getElementById('matrix-body');
             
             if (result && result.success && result.data.length > 0) {

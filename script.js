@@ -2,6 +2,15 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxSSBfQ9p8cyagtyT9WlQ2H
 const SECRET_TOKEN = "maxtring2026";
 
 // ============================================
+// TAB NAME CONSTANTS — Single source of truth
+// Update these when moving to a new month.
+// Matrix tab name & Content Bank tab name differ!
+// ============================================
+const MATRIX_MONTH_TAB       = "Content JUNI";  // Exact tab name in Matrix All-Marketing
+const CONTENT_BANK_MONTH_TAB = "Juni";          // Exact tab name in SMS Content Bank
+
+
+// ============================================
 // THEME MANAGEMENT
 // ============================================
 function initTheme() {

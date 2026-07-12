@@ -10,7 +10,9 @@ function getSheetByName(spreadsheetId, sheetName) {
   var ss = SpreadsheetApp.openById(spreadsheetId);
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
-    sheet = ss.insertSheet(sheetName);
+    // NEVER auto-create — sheets are created manually by SMS team.
+    // Throw a clear error so the frontend can display a useful message.
+    throw new Error("Tab '" + sheetName + "' tidak ditemukan di spreadsheet. Periksa nama tab (huruf besar/kecil harus persis sama).");
   }
   return sheet;
 }
@@ -373,30 +375,18 @@ function scheduleIdea(ideaData) {
       }
     }
     
-    // 2. Prepare data for Matrix
-    // Target headers based on Morpest Matrix All-Marketing
-    var targetHeaders = ["No", "Upload Deadline", "Day Upload", "Time Upload", "Content Ideas", "References", "SMS Ideas Creation", "Jenis Content", "Brief CW", "PIC CW", "HASIL TULISAN (CHECK DISINI)", "PIC GD", "HASIL DESIGN (CEK DISINI)", "PIC Talent", "LINK VIDEO DISINI", "PIC SMS", "STATUS UPLOAD SMS", "Status CW", "Status GD", "Status Talent", "Overall Status"];
+    // 2. Append new row to Matrix
+    // Column names MUST match exact headers in actual spreadsheet:
+    // No | Upload Deadline | Day Upload | Time Upload | Content Ideas | References
+    // | SMS Ideas Direction | Jenis Content | Brief CW | PJ CW | Design GD | PJ GD
+    // | LINK VIDEO | PJ TALENT | Status Upload SMS | PJ SMS
     
     var mxData = mxSheet.getDataRange().getValues();
-    if (!mxData[0] || mxData[0].length < 2) {
-       mxSheet.getRange(1, 1, 1, targetHeaders.length).setValues([targetHeaders]);
-       mxData = [targetHeaders];
-    }
     var mxHeaders = mxData[0];
-    
-    // Ensure new Status columns exist
-    var requiredCols = ["Status CW", "Status GD", "Status Talent", "Overall Status"];
-    for(var c=0; c<requiredCols.length; c++) {
-      if(mxHeaders.indexOf(requiredCols[c]) === -1) {
-        mxHeaders.push(requiredCols[c]);
-        mxSheet.getRange(1, mxHeaders.length).setValue(requiredCols[c]);
-      }
-    }
-    
     var mxHeaderMap = getHeaderMap(mxSheet);
     
-    // Calculate new "No" for Matrix
-    var mxNoCol = mxHeaderMap["No"] !== undefined ? mxHeaderMap["No"] : 0;
+    // Calculate new row number (find max existing No)
+    var mxNoCol = mxHeaderMap['No'] !== undefined ? mxHeaderMap['No'] : 0;
     var maxNo = 0;
     for (var j = 1; j < mxData.length; j++) {
       var currentNo = parseInt(mxData[j][mxNoCol], 10);
@@ -406,32 +396,20 @@ function scheduleIdea(ideaData) {
     }
     var newNo = maxNo + 1;
     
+    // Build minimal row object using actual column names
     var newRowObj = {};
-    newRowObj["No"] = newNo;
-    newRowObj["Upload Deadline"] = ideaData.date; // H Date
+    newRowObj['No']             = newNo;
+    newRowObj['Upload Deadline'] = ideaData.date;
+    newRowObj['Content Ideas']  = ideaData.title;
+    newRowObj['SMS Ideas Direction'] = ideaData.smsDirection || '';
+    newRowObj['Jenis Content']  = ideaData.jenisContent || '';
     
-    // Day String
+    // Day of week
     var d = new Date(ideaData.date);
     if (!isNaN(d.getTime())) {
-      var days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-      newRowObj["Day Upload"] = days[d.getDay()];
-      
-      // SLA Calculation / Deadlines
-      var cwDate = new Date(d); cwDate.setDate(cwDate.getDate() - 3);
-      var gdDate = new Date(d); gdDate.setDate(gdDate.getDate() - 2);
-      
-      // We can insert deadline notes in Brief CW or other places if needed, but per original Matrix, they just use Upload Deadline.
-      // So we will just trust the dates for now or append it to references.
+      var days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      newRowObj['Day Upload'] = days[d.getDay()];
     }
-    
-    newRowObj["Content Ideas"] = ideaData.title;
-    newRowObj["Jenis Content"] = parts[1] || ""; // The pillar
-    
-    newRowObj["Overall Status"] = "On Process";
-    newRowObj["Status CW"] = "Not Started";
-    newRowObj["Status GD"] = "Not Started";
-    newRowObj["Status Talent"] = "Not Started";
-    newRowObj["STATUS UPLOAD SMS"] = "Not Started";
     
     var mxRowData = objectToRow(newRowObj, mxHeaders, mxHeaders.length);
     mxSheet.appendRow(mxRowData);
