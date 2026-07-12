@@ -499,10 +499,22 @@ a:hover {
 
 /* Tables */
 .table-container {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 75vh;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
+}
+
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--surface);
+}
+
+[data-theme="dark"] .table-container thead th {
+  background-color: var(--surface);
 }
 
 table {

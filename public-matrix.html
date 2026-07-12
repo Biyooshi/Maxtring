@@ -97,8 +97,9 @@
             if (result && result.success && result.data.length > 0) {
                 let html = '';
                 result.data.forEach(row => {
-                    const jenisContent = (row['Jenis Content'] || row['_jenisContent'] || '').toLowerCase();
+                    const jenisContent = (row['Jenis Content'] || '').toLowerCase();
                     const isReels = jenisContent === 'reels';
+                    const overallStatus = computeOverallStatus(row); // dihitung, bukan dari spreadsheet
                     
                     // Helper: render a link cell
                     const linkCell = (val, label) => val 
@@ -133,7 +134,7 @@
                             <td>${talentPJ}</td>
                             <td><span class="badge ${getBadgeClass(row['Status Upload SMS'])}">${row['Status Upload SMS'] || '-'}</span></td>
                             <td>${row['PJ SMS'] || '-'}</td>
-                            <td><span class="badge ${getBadgeClass(row['Overall Status'])}">${row['Overall Status'] || 'Not Started'}</span></td>
+                            <td><span class="badge ${getBadgeClass(overallStatus)}">${overallStatus}</span></td>
                         </tr>
                     `;
                 });

@@ -122,20 +122,26 @@
                     // Fetch Matrix data
                     const result = await callApi('getMatrixData', { month: MATRIX_MONTH_TAB });
                     if (result && result.success) {
-                        const events = result.data.map(row => {
-                            let color = '#2f668f'; // default primary
-                            if (row["Overall Status"] === 'Posted') color = '#8B5CF6';
-                            if (row["Overall Status"] === 'Approved') color = '#10B981';
-                            
-                            let dateStr = row["Upload Deadline"];
-                            
-                            return {
-                                title: `${row["Content Ideas"]} (${row["Overall Status"]})`,
-                                start: dateStr,
-                                allDay: true,
-                                backgroundColor: color
-                            };
-                        });
+                        const events = result.data
+                            .map(row => {
+                                const parsedDate = parseIndonesianDate(row["Upload Deadline"]);
+                                if (!parsedDate) return null; // skip baris dengan tanggal tidak valid/kosong
+
+                                const overallStatus = computeOverallStatus(row);
+                                let color = '#2f668f';
+                                if (overallStatus === 'Posted') color = '#8B5CF6';
+                                if (overallStatus === 'Ready to Upload') color = '#10B981';
+
+                                const isoDate = parsedDate.toISOString().split('T')[0];
+
+                                return {
+                                    title: `${row["Content Ideas"] || 'Tanpa Judul'} (${overallStatus})`,
+                                    start: isoDate,
+                                    allDay: true,
+                                    backgroundColor: color
+                                };
+                            })
+                            .filter(e => e !== null);
                         successCallback(events);
                     } else {
                         failureCallback();

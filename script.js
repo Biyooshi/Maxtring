@@ -8,6 +8,45 @@ const SECRET_TOKEN = "maxtring2026";
 // ============================================
 const MATRIX_MONTH_TAB       = "Content JUNI";  // Exact tab name in Matrix All-Marketing
 const CONTENT_BANK_MONTH_TAB = "Juni";          // Exact tab name in SMS Content Bank
+// ============================================
+// DATE PARSING (format Indonesia: DD/MM/YYYY atau DD/MM/YY)
+// ============================================
+function parseIndonesianDate(dateStr) {
+  if (!dateStr) return null;
+  const parts = String(dateStr).split('/');
+  if (parts.length !== 3) return null;
+
+  let [day, month, year] = parts.map(p => parseInt(p, 10));
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+  if (year < 100) year += 2000;
+
+  const parsed = new Date(year, month - 1, day);
+  if (parsed.getDate() !== day || parsed.getMonth() !== month - 1 || parsed.getFullYear() !== year) {
+    return null; // tanggal tidak valid (misal 32/13/2026)
+  }
+  return parsed;
+}
+
+// ============================================
+// OVERALL STATUS — dihitung di frontend, TIDAK menyentuh spreadsheet asli
+// ============================================
+function computeOverallStatus(row) {
+  const statusSMS = (row['Status Upload SMS'] || '').toLowerCase();
+  if (statusSMS === 'posted') return 'Posted';
+
+  const isReels   = (row['Jenis Content'] || '').toLowerCase() === 'reels';
+  const hasBrief  = !!row['Brief CW'];
+  const hasDesign = !!row['Design GD'];
+  const hasVideo  = !!row['LINK VIDEO'];
+
+  const allAssetsReady = isReels
+    ? (hasBrief && hasDesign && hasVideo)
+    : (hasBrief && hasDesign);
+
+  if (allAssetsReady) return 'Ready to Upload';
+  if (hasBrief || hasDesign || hasVideo) return 'On Process';
+  return 'Not Started';
+}
 
 
 // ============================================
@@ -145,12 +184,15 @@ function getBadgeClass(status) {
 // SLA CALCULATION
 // ============================================
 function calculateSLA(deadlineStr) {
-  if (!deadlineStr) return { text: "No SLA", color: "var(--text-muted)", progress: 0 };
+  const deadline = parseIndonesianDate(deadlineStr);
+  if (!deadline) return { text: "No SLA", color: "var(--text-muted)", progress: 0 };
   
-  const deadline = new Date(deadlineStr);
   const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  deadline.setHours(0, 0, 0, 0);
+  
   const diffTime = deadline - now;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays < 0) return { text: `Overdue ${Math.abs(diffDays)} hari`, color: "var(--danger)", progress: 100 };
   if (diffDays === 0) return { text: "Due Today", color: "var(--danger)", progress: 95 };
